@@ -5,6 +5,7 @@ import (
 	"golang_project/models"
 	"golang_project/repositories"
 	"golang_project/services"
+	test "golang_project/test/mock"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,6 +16,25 @@ var (
 	friendConnectionService    services.FriendConnectionService        = services.New(friendConnectionRepository)
 	friendConnectionController controllers.FriendConnectionController  = controllers.New(friendConnectionService)
 )
+
+//1.
+func TestFriendConnectionSuccessfulCase(t *testing.T) {
+	repoMock := &test.FriendConnectionRepoMock{}
+	// repoMock.On("CreateConnection", test.AnythingOfType("*map[string]interface{}")).Return(true, nil)
+	myService := services.New(repoMock)
+	result := myService.CreateConnection(models.FriendConnectionRequest{Friends: []string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"}})
+	expectedRs := models.FriendConnectionResponse{Success: true}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestFriendConnectionFailCase(t *testing.T) {
+	repoMock := &test.FriendConnectionRepoMock{}
+	// repoMock.On("CreateConnection", test.AnythingOfType("*map[string]interface{}")).Return(false, nil)
+	myService := services.New(repoMock)
+	result := myService.CreateConnection(models.FriendConnectionRequest{Friends: []string{}})
+	expectedRs := models.FriendConnectionResponse{Success: false}
+	assert.Equal(t, expectedRs, result)
+}
 
 //2.
 func TestShowFriendsByEmailSuccessfulCase(t *testing.T) {
@@ -36,10 +56,28 @@ func TestShowFriendsByEmailSuccessfulCase(t *testing.T) {
 }
 
 func TestShowFriendsByEmailEmptyModel(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	friendConnectionService.GetFriendConnection(models.FriendListRequest{})
+}
 
-	response := friendConnectionService.GetFriendConnection(models.FriendListRequest{})
+func TestShowFriendsByEmailWithEmptyResponse(t *testing.T) {
 
-	exp := models.FriendListResponse{}
+	request := models.FriendListRequest{
+		Email: "test@test.com",
+	}
+
+	response := friendConnectionService.GetFriendConnection(request)
+
+	exp := models.FriendListResponse{
+		Success: false,
+		Friends: []string(nil),
+		Count:   0,
+	}
 	assert.Equal(t, exp, response)
 }
 
@@ -62,6 +100,16 @@ func TestShowCommonFriendListSuccessfulCase(t *testing.T) {
 	assert.Equal(t, exp, response)
 }
 
+func TestShowCommonFriendListWithInvalidEmail(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	friendConnectionService.ShowCommonFriendList(models.CommonFriendListRequest{Friends: []string{"hao.nguyen"}})
+}
+
 func TestShowCommonFriendListEmptyModel(t *testing.T) {
 
 	response := friendConnectionService.ShowCommonFriendList(models.CommonFriendListRequest{})
@@ -70,8 +118,81 @@ func TestShowCommonFriendListEmptyModel(t *testing.T) {
 	assert.Equal(t, exp, response)
 }
 
+//4.
+func TestSubscribeFromEmailSuccessfulCase(t *testing.T) {
+	repoMock := &test.FriendConnectionRepoMock{}
+	// repoMock.On("SubscribeFromEmail", test.AnythingOfType("models.SubscribeRequest")).Return(true, nil).Once()
+	myService := services.New(repoMock)
+	result := myService.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "hao.nguyen@s3corp.com .vn"})
+	expectedRs := models.SubscribeResponse{Success: true}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestSubscribeFromEmailFailCase(t *testing.T) {
+	repoMock := &test.FriendConnectionRepoMock{}
+	// repoMock.On("SubscribeFromEmail", test.AnythingOfType("models.SubscribeRequest")).Return(nil).Once()
+	myService := services.New(repoMock)
+	result := myService.SubscribeFromEmail(models.SubscribeRequest{})
+	expectedRs := models.SubscribeResponse{Success: false}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestSubscribeFromEmailWithEmptyRequestor(t *testing.T) {
+	repoMock := &test.FriendConnectionRepoMock{}
+	// repoMock.On("SubscribeFromEmail", test.AnythingOfType("models.SubscribeRequest")).Return(nil).Once()
+	myService := services.New(repoMock)
+	result := myService.SubscribeFromEmail(models.SubscribeRequest{Target: "hao.nguyen@s3corp.com.vn"})
+	expectedRs := models.SubscribeResponse{Success: false}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestSubscribeFromEmailWithEmptyTarget(t *testing.T) {
+	repoMock := &test.FriendConnectionRepoMock{}
+	// repoMock.On("SubscribeFromEmail", test.AnythingOfType("models.SubscribeRequest")).Return(nil).Once()
+	myService := services.New(repoMock)
+	result := myService.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn"})
+	expectedRs := models.SubscribeResponse{Success: false}
+	assert.Equal(t, expectedRs, result)
+}
+
+//5.
+func TestBlockSubscribeByEmailSuccessfulCase(t *testing.T) {
+	repoMock := &test.FriendConnectionRepoMock{}
+	// repoMock.On("BlockSubscribeByEmail", test.AnythingOfType("models.BlockSubscribeRequest")).Return(true, nil).Once()
+	myService := services.New(repoMock)
+	result := myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm@yoo.com.vn", Target: "hao.nguyen@s3corp.com .vn"})
+	expectedRs := models.BlockSubscribeResponse{Success: true}
+	assert.Equal(t, expectedRs, result)
+}
+func TestBlockSubscribeByEmailFailCase(t *testing.T) {
+	repoMock := &test.FriendConnectionRepoMock{}
+	// repoMock.On("BlockSubscribeByEmail", test.AnythingOfType("models.BlockSubscribeRequest")).Return(false, nil).Once()
+	myService := services.New(repoMock)
+	result := myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{})
+	expectedRs := models.BlockSubscribeResponse{Success: false}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestBlockSubscribeByEmailWithEmptyTarget(t *testing.T) {
+	repoMock := &test.FriendConnectionRepoMock{}
+	// repoMock.On("BlockSubscribeByEmail", test.AnythingOfType("models.BlockSubscribeRequest")).Return(false, nil).Once()
+	myService := services.New(repoMock)
+	result := myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn"})
+	expectedRs := models.BlockSubscribeResponse{Success: false}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestBlockSubscribeByEmailWithEmptyRequestor(t *testing.T) {
+	repoMock := &test.FriendConnectionRepoMock{}
+	// repoMock.On("BlockSubscribeByEmail", test.AnythingOfType("models.BlockSubscribeRequest")).Return(false, nil).Once()
+	myService := services.New(repoMock)
+	result := myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{Target: "thehaohcm@yahoo.com.vn"})
+	expectedRs := models.BlockSubscribeResponse{Success: false}
+	assert.Equal(t, expectedRs, result)
+}
+
 //6.
-func TestGetSubscribingEmailListByEmailSuccessfulCase(t *testing.T) {
+func TestGetSubscribingEmailListWithEmailSuccessfulCase(t *testing.T) {
 
 	model := models.GetSubscribingEmailListRequest{
 		Sender: "thehaohcm@yahoo.com.vn",
@@ -83,13 +204,30 @@ func TestGetSubscribingEmailListByEmailSuccessfulCase(t *testing.T) {
 	exp := models.GetSubscribingEmailListResponse{
 		Success: true,
 		Recipients: []string{
+			"hao.nguyen@s3corp.com.vn",
 			"kate@example.com",
 		},
 	}
 	assert.Equal(t, exp, response)
 }
 
-func TestGetSubscribingEmailListByEmailEmptyModel(t *testing.T) {
+func TestGetSubscribingEmailListWithEmailFailCase(t *testing.T) {
+
+	model := models.GetSubscribingEmailListRequest{
+		Sender: "dfa@yahoo.com.vn",
+		Text:   "helloworld!",
+	}
+
+	response := friendConnectionService.GetSubscribingEmailListByEmail(model)
+
+	exp := models.GetSubscribingEmailListResponse{
+		Success:    false,
+		Recipients: nil,
+	}
+	assert.Equal(t, exp, response)
+}
+
+func TestGetSubscribingEmailListWithEmailEmptyModel(t *testing.T) {
 
 	response := friendConnectionService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{})
 
@@ -97,43 +235,28 @@ func TestGetSubscribingEmailListByEmailEmptyModel(t *testing.T) {
 	assert.Equal(t, exp, response)
 }
 
-// type Stringer interface {
-// 	String() string
-// }
+func TestGetSubscribingEmailListWithInvalidEmail(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	friendConnectionService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm", Text: "abc"})
+}
 
-// type SendFunc struct {
-// 	mock.Mock
-// }
+func TestGetSubscribingEmailListWithNilSender(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	friendConnectionService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Text: "abc"})
+}
 
-// func testMethod() {
-// 	requesterMock := mocks.NewRequester(t)
-// 	requesterMock.EXPECT().Get("some path").Return("result", nil)
-// 	requesterMock.EXPECT().
-// 		Get(mock.Anything).
-// 		Run(func(path string) { fmt.Println(path, "was called") }).
-// 		// Can still use return functions by getting the embedded mock.Call
-// 		Call.Return(func(path string) string { return "result for " + path }, nil)
-// }
-
-// func (m *Stringer) String() string {
-// 	ret := m.Called()
-
-// 	var r0 string
-// 	if rf, ok := ret.Get(0).(func() string); ok {
-// 		r0 = rf()
-// 	} else {
-// 		r0 = ret.Get(0).(string)
-// 	}
-
-// 	return r0
-// }
-
-// // NewStringer creates a new instance of Stringer. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
-// func NewStringer(t testing.TB) *Stringer {
-// 	mock := &Stringer{}
-// 	mock.Mock.Test(t)
-
-// 	t.Cleanup(func() { mock.AssertExpectations(t) })
-
-// 	return mock
-// }
+func TestGetSubscribingEmailListWithEmptyReponse(t *testing.T) {
+	response := friendConnectionService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "hung.tong@s3corp.com.vn", Text: "abc"})
+	expRs := models.GetSubscribingEmailListResponse{Success: false, Recipients: nil}
+	assert.Equal(t, expRs, response)
+}

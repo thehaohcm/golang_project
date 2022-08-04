@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"golang_project/models"
 	"golang_project/repositories"
 )
@@ -10,7 +11,7 @@ type FriendConnectionService interface {
 	GetFriendConnection(request models.FriendListRequest) models.FriendListResponse
 	ShowCommonFriendList(request models.CommonFriendListRequest) models.CommonFriendListResponse
 	SubscribeFromEmail(request models.SubscribeRequest) models.SubscribeResponse
-	BlockSuscribeByEmail(request models.BlockSubscribeRequest) models.BlockSubscribeResponse
+	BlockSubscribeByEmail(request models.BlockSubscribeRequest) models.BlockSubscribeResponse
 	GetSubscribingEmailListByEmail(request models.GetSubscribingEmailListRequest) models.GetSubscribingEmailListResponse
 }
 
@@ -26,7 +27,11 @@ func New(repo repositories.FriendConnectionRepository) FriendConnectionService {
 
 func (svc *service) CreateConnection(request models.FriendConnectionRequest) models.FriendConnectionResponse {
 	var response models.FriendConnectionResponse
-	response.Success, _ = svc.repository.CreateFriendConnection(request.Friends)
+	var tx *sql.Tx
+	response.Success, tx = svc.repository.CreateFriendConnection(request.Friends)
+	if response.Success == true && tx != nil {
+		tx.Commit()
+	}
 	return response
 }
 
@@ -56,13 +61,21 @@ func (svc *service) ShowCommonFriendList(request models.CommonFriendListRequest)
 
 func (svc *service) SubscribeFromEmail(request models.SubscribeRequest) models.SubscribeResponse {
 	var response models.SubscribeResponse
-	response.Success, _ = svc.repository.SubscribeFromEmail(request)
+	var tx *sql.Tx
+	response.Success, tx = svc.repository.SubscribeFromEmail(request)
+	if response.Success == true && tx != nil {
+		tx.Commit()
+	}
 	return response
 }
 
-func (svc *service) BlockSuscribeByEmail(request models.BlockSubscribeRequest) models.BlockSubscribeResponse {
+func (svc *service) BlockSubscribeByEmail(request models.BlockSubscribeRequest) models.BlockSubscribeResponse {
 	var response models.BlockSubscribeResponse
-	response.Success, _ = svc.repository.BlockSubscribeByEmail(request)
+	var tx *sql.Tx
+	response.Success, tx = svc.repository.BlockSubscribeByEmail(request)
+	if response.Success == true && tx != nil {
+		tx.Commit()
+	}
 	return response
 }
 

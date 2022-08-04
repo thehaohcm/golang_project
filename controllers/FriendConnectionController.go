@@ -13,7 +13,7 @@ type FriendConnectionController interface {
 	GetFriendListByEmail(c *gin.Context)
 	ShowCommonFriendList(c *gin.Context)
 	SubscribeFromEmail(c *gin.Context)
-	BlockSuscribeByEmail(c *gin.Context)
+	BlockSubscribeByEmail(c *gin.Context)
 	GetSubscribingEmailListByEmail(c *gin.Context)
 }
 
@@ -41,11 +41,13 @@ func New(service services.FriendConnectionService) FriendConnectionController {
 func (ctl *controller) CreateFriendConnection(c *gin.Context) {
 	var newFriendConnection models.FriendConnectionRequest
 	if err := c.BindJSON(&newFriendConnection); err != nil {
-		panic(err)
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
 	if len(newFriendConnection.Friends) != 2 {
 		c.IndentedJSON(http.StatusBadRequest, nil)
+		return
 	}
 
 	response := ctl.service.CreateConnection(newFriendConnection)
@@ -114,6 +116,12 @@ func (ctl *controller) ShowCommonFriendList(c *gin.Context) {
 func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 	var request models.SubscribeRequest
 	if err := c.BindJSON(&request); err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	if request.Requestor == "" || request.Target == "" {
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
@@ -130,13 +138,19 @@ func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 // @Produce json
 // @Param   Request body models.BlockSubscribeRequest true "Block updates from an email address"
 // @Router /friends/blockSubscribeUpdateByEmail [post]
-func (ctl *controller) BlockSuscribeByEmail(c *gin.Context) {
+func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 	var request models.BlockSubscribeRequest
 	if err := c.BindJSON(&request); err != nil {
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	response := ctl.service.BlockSuscribeByEmail(request)
+	if request.Requestor == "" || request.Target == "" {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	response := ctl.service.BlockSubscribeByEmail(request)
 	c.IndentedJSON(http.StatusOK, response)
 }
 
@@ -156,7 +170,7 @@ func (ctl *controller) GetSubscribingEmailListByEmail(c *gin.Context) {
 		return
 	}
 
-	if request == (models.GetSubscribingEmailListRequest{}) {
+	if request.Sender == "" || request.Text == "" {
 		c.Status(http.StatusBadRequest)
 		return
 	}

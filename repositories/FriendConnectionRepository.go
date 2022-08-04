@@ -33,11 +33,18 @@ func New() FriendConnectionRepository {
 
 //1.
 func (repo *repository) CreateFriendConnection(emails []string) (bool, *sql.Tx) {
+
+	//check empty or invalid email format
+	if len(emails) < 2 || len(emails) > 2 {
+		panic("invalid request")
+	}
+	checkValidEmails(emails)
+
 	tx, err := repo.db.BeginTx(repo.ctx, nil)
 	if err != nil {
 		panic(err)
 	}
-	_, err = tx.Exec("INSERT INTO friends('user_email','friend_email') VALUES ('" + emails[0] + "','" + emails[1] + "')")
+	_, err = tx.Exec("INSERT INTO friends('user_email','friend_email') VALUES(?,?)", emails[0], emails[1])
 
 	if err != nil {
 		// return false
@@ -48,6 +55,8 @@ func (repo *repository) CreateFriendConnection(emails []string) (bool, *sql.Tx) 
 
 //2.
 func (repo *repository) FindFriendsByEmail(email string) []string {
+	checkValidEmails([]string{email})
+
 	rows, err := repo.db.Query("SELECT friend_email FROM friends WHERE user_email=? AND BLOCKED=0", email)
 	if err != nil {
 		panic(err)
@@ -67,6 +76,7 @@ func (repo *repository) FindFriendsByEmail(email string) []string {
 
 //3.
 func (repo *repository) FindCommonFriendsByEmails(emails []string) []string {
+	checkValidEmails(emails)
 	sqlStatement := "SELECT friend_email FROM friends WHERE"
 	for _, email := range emails {
 		sqlStatement += " user_email='" + email + "' OR"
@@ -94,42 +104,45 @@ func (repo *repository) FindCommonFriendsByEmails(emails []string) []string {
 
 //4.
 func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (bool, *sql.Tx) {
+	checkValidEmails([]string{req.Requestor, req.Target})
 	tx, err := repo.db.BeginTx(repo.ctx, nil)
 	if err != nil {
 		panic(err)
 	}
-	_, err = repo.db.Exec("INSERT INTO subscribers('requestor','target') VALUES (?,?)", req.Requestor, req.Target)
+	_, err = tx.Exec("INSERT INTO subscribers('requestor','target') VALUES (?,?)", req.Requestor, req.Target)
 	if err != nil {
 		panic(err)
 		// return false
 	}
+
 	return true, tx
 }
 
 //5.
 func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) (bool, *sql.Tx) {
+	checkValidEmails([]string{req.Requestor, req.Target})
 	tx, err := repo.db.BeginTx(repo.ctx, nil)
 	if err != nil {
 		panic(err)
 	}
 
-	//support A block B:
+	//suppose A block B:
 
 	if repo.hasFriendConnection(req.Requestor, req.Target) {
 		//if A and B are friend, A no longer receive notify from B
-		res, err := repo.db.Exec("INSERT OR REPLACE INTO subscribers('requestor','target', 'blocked') VALUES (?,?,1)", req.Requestor, req.Target)
+		res, err := tx.Exec("INSERT OR REPLACE INTO subscribers('requestor','target', 'blocked') VALUES (?,?,1)", req.Requestor, req.Target)
 		if err != nil {
-			return false, nil
+			panic(err)
 		}
 
 		if _, err = res.LastInsertId(); err != nil {
-			return false, nil
+			panic(err)
 		}
 	} else {
 		//if not friend, no new friend connection added
-		res, err := repo.db.Exec("INSERT OR REPLACE INTO friends('user_email','friend_email', 'blocked') VALUES (?,?,1)", req.Requestor, req.Target)
+		res, err := tx.Exec("INSERT OR REPLACE INTO friends('user_email','friend_email', 'blocked') VALUES (?,?,1)", req.Requestor, req.Target)
 		if err != nil {
-			return false, nil
+			panic(err)
 		}
 		if _, err = res.LastInsertId(); err != nil {
 			panic(err)
@@ -140,6 +153,7 @@ func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) 
 }
 
 func (repo *repository) hasFriendConnection(requestor string, target string) bool {
+	checkValidEmails([]string{requestor, target})
 	rows, err := repo.db.Query("SELECT * FROM friends WHERE user_email=? AND friend_email=? AND BLOCKED=0", requestor, target)
 	if err != nil {
 		return false
@@ -154,7 +168,7 @@ func (repo *repository) hasFriendConnection(requestor string, target string) boo
 
 //6.
 func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribingEmailListRequest) models.GetSubscribingEmailListResponse {
-
+	checkValidEmails([]string{req.Sender})
 	var res models.GetSubscribingEmailListResponse
 	res.Success = false
 
@@ -196,7 +210,7 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 	}
 
 	//if subscribed to updates
-	rows, err = repo.db.Query("SELECT target FROM subscribers WHERE target=? AND blocked=0", req.Sender)
+	rows, err = repo.db.Query("SELECT requestor FROM subscribers WHERE target=? AND blocked=0", req.Sender)
 	if err != nil {
 		return res
 	}
@@ -218,7 +232,20 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 		}
 	}
 
-	res.Recipients = recipients
-	res.Success = true
+	if len(recipients) > 0 {
+		res.Recipients = recipients
+		res.Success = true
+	}
 	return res
+}
+
+func checkValidEmails(emails []string) {
+	if emails == nil {
+		panic("empty request")
+	}
+	for _, email := range emails {
+		if strings.TrimSpace(email) == "" || !utils.IsEmailValid(email) {
+			panic("invalid request")
+		}
+	}
 }

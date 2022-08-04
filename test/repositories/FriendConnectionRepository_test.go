@@ -1,13 +1,10 @@
 package unit_testing
 
 import (
-	"fmt"
+	"database/sql"
+	"golang_project/models"
 	"golang_project/repositories"
 	"testing"
-
-	// db "github.com/mattn/go-sqlite3"
-	"database/sql"
-	"os"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -16,42 +13,86 @@ var (
 	repo repositories.FriendConnectionRepository = repositories.New()
 )
 
-func TestMain(m *testing.M) {
-	// os.Exit skips defer calls
-	// so we need to call another function
-	code, err := run(m)
-	if err != nil {
-		fmt.Println(err)
+//1.
+func TestFindFriendsByEmailWithSuccessfulCase(t *testing.T) {
+	result := repo.FindFriendsByEmail("thehaohcm@yahoo.com.vn")
+	expectedResult := []string{
+		"hao.nguyen@s3corp.com.vn",
 	}
-	os.Exit(code)
+	assert.Equal(t, expectedResult, result)
 }
 
-func run(m *testing.M) (code int, err error) {
-	// pseudo-code, some implementation excluded:
-	//
-	// 1. create test.db if it does not exist
-	// 2. run our DDL statements to create the required tables if they do not exist
-	// 3. run our tests
-	// 4. truncate the test db tables
+func TestFindFriendsByEmailWithNoResult(t *testing.T) {
+	result := repo.FindFriendsByEmail("test@test.com")
+	expectedResult := []string(nil)
+	assert.Equal(t, expectedResult, result)
+}
 
-	db, err := sql.Open("sqlite3", "file: golang_project.db")
-	if err != nil {
-		return -1, fmt.Errorf("could not connect to database: %w", err)
-	}
-
-	// truncates all test data after the tests are run
+func TestFindFriendsByEmailWithEmptyRequest(t *testing.T) {
 	defer func() {
-		for _, t := range []string{"friends", "subscribers", "users"} {
-			_, _ = db.Exec(fmt.Sprintf("DELETE FROM %s", t))
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
 		}
-
-		db.Close()
 	}()
-
-	return m.Run(), nil
+	repo.FindFriendsByEmail("")
 }
 
-func TestCreateFriendConnection(t *testing.T) {
+func TestFindFriendsByEmailWithInvalidEmailRequest(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.FindFriendsByEmail("abc")
+}
+
+//2.
+func TestFindCommonFriendsByEmailsWithSuccessfulCase(t *testing.T) {
+	result := repo.FindCommonFriendsByEmails([]string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"})
+	expectedRs := []string{"chinh.nguyen@s3corp.com.vn"}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestFindCommonFriendsByEmailsWithEmptyResponse(t *testing.T) {
+	result := repo.FindCommonFriendsByEmails([]string{"thehaohcm@yahoo.com.vn", "thehaohcm@gmail.com"})
+	expectedRs := []string(nil)
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestFindCommonFriendsByEmailsWithNilRequest(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "empty request", msg)
+		}
+	}()
+	repo.FindCommonFriendsByEmails(nil)
+}
+
+func TestFindCommonFriendsByEmailsWithEmptyEmailRequest(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.FindCommonFriendsByEmails([]string{""})
+}
+
+func TestFindCommonFriendsByEmailsWithInvalidEmailRequest(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.FindCommonFriendsByEmails([]string{"test"})
+}
+
+//3.
+func TestCreateFriendConnectionWithSuccessfulCase(t *testing.T) {
 
 	result, tx := repo.CreateFriendConnection([]string{
 		"abc@def.com",
@@ -59,12 +100,196 @@ func TestCreateFriendConnection(t *testing.T) {
 	})
 
 	//rollback db
-	fmt.Println("hao")
-	if tx != nil {
-		fmt.Println("dfa")
-	} else {
-		fmt.Println("fda")
-	}
-	assert.Equal(t, true, result)
+	rollbackCtx(tx)
 
+	assert.Equal(t, true, result)
+}
+
+func TestCreateFriendConnectionWithNilRequest(t *testing.T) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+
+	repo.CreateFriendConnection(nil)
+}
+
+func TestCreateFriendConnectionWithEmptyRequest(t *testing.T) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.CreateFriendConnection([]string{""})
+}
+
+func TestCreateFriendConnectionWithInvalidEmail(t *testing.T) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.CreateFriendConnection([]string{"test"})
+}
+
+func TestCreateFriendConnectionWithExceesEmails(t *testing.T) {
+
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+
+	repo.CreateFriendConnection([]string{"hao.nguyen@s3corp.com.vn", "thehaohcm@yahoo.com.vn", "thehaohcm@gmai.com"})
+}
+
+//4.
+func TestSubscribeFromEmailWithSuccessfulCase(t *testing.T) {
+	result, tx := repo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "chinh.nguyen@s3corp.com.vn"})
+	rollbackCtx(tx)
+	assert.Equal(t, true, result)
+}
+
+func TestSubscribeFromEmailWithInvalidEmail(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen@s3corp.com.vn"})
+}
+
+func TestSubscribeFromEmailWithInvalidEmails(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen"})
+}
+
+func TestSubscribeFromEmailWithNilReq(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.SubscribeFromEmail(models.SubscribeRequest{})
+}
+
+//5.
+func TestBlockSubscribeByEmailWithSuccessfulCaseAndHaveNoFriend(t *testing.T) {
+	result, tx := repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "thehaohcm@gmail.com"})
+	rollbackCtx(tx)
+	assert.Equal(t, true, result)
+}
+
+func TestBlockSubscribeByEmailWithSuccessfulCaseAndHaveFriend(t *testing.T) {
+	result, tx := repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "chinh.nguyen@s3corp.com.vn", Target: "hao.nguyen@s3corp.com.vn"})
+	rollbackCtx(tx)
+	assert.Equal(t, true, result)
+}
+
+func TestBlockSubscribeByEmailInvalidEmails(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen"})
+}
+
+func TestBlockSubscribeByEmailWithNilRequest(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{})
+}
+
+func TestBlockSubscribeByEmailWithNilRequestor(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Target: "chinh.nguyen"})
+}
+
+func TestBlockSubscribeByEmailWithNilTarget(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm"})
+}
+
+//6.
+func TestGetSubscribingEmailListByEmailWithSuccessfulCaseAndEmailInText(t *testing.T) {
+	result := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm@yahoo.com.vn", Text: "hello world, kate@example.com"})
+	expectedRs := models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{
+		"hao.nguyen@s3corp.com.vn",
+		"kate@example.com",
+	}}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestGetSubscribingEmailListByEmailWithSuccessfulCaseNotEmailInText(t *testing.T) {
+	result := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm@yahoo.com.vn", Text: "hello world"})
+	expectedRs := models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{
+		"hao.nguyen@s3corp.com.vn",
+	}}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestGetSubscribingEmailListByEmailWithSuccessfulAndEmptyResponse(t *testing.T) {
+	result := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "hung.tong@s3corp.com.vn", Text: "hello world"})
+	expectedRs := models.GetSubscribingEmailListResponse{Success: false, Recipients: nil}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestGetSubscribingEmailListByEmailWithNilSender(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Text: "hello world"})
+}
+
+func TestGetSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			msg := r.(string)
+			assert.Equal(t, "invalid request", msg)
+		}
+	}()
+	repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm", Text: "hello world"})
+}
+
+func rollbackCtx(tx *sql.Tx) {
+	if tx != nil {
+		err := tx.Rollback()
+		if err != nil {
+			panic(err)
+		}
+	}
 }

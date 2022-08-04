@@ -37,7 +37,7 @@ func SetupRouter() *gin.Engine {
 			v1.POST("/friends/subscribeFromEmail", friendConnectionController.SubscribeFromEmail)
 
 			//5. Done
-			v1.POST("/friends/blockSubscribeByEmail", friendConnectionController.BlockSuscribeByEmail)
+			v1.POST("/friends/blockSubscribeByEmail", friendConnectionController.BlockSubscribeByEmail)
 
 			//6. Done
 			v1.POST("/friends/showSubscribingEmailListByEmail", friendConnectionController.GetSubscribingEmailListByEmail)
