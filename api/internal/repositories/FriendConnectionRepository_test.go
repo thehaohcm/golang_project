@@ -1,21 +1,21 @@
-package unit_testing
+package repositories
 
 import (
 	"database/sql"
-	"golang_project/models"
-	"golang_project/repositories"
 	"testing"
+
+	"golang_project/api/internal/models"
 
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	repo repositories.FriendConnectionRepository = repositories.New()
+	repo FriendConnectionRepository = New()
 )
 
 //1.
 func TestFindFriendsByEmailWithSuccessfulCase(t *testing.T) {
-	result := repo.FindFriendsByEmail("thehaohcm@yahoo.com.vn")
+	result, _ := repo.FindFriendsByEmail("thehaohcm@yahoo.com.vn")
 	expectedResult := []string{
 		"hao.nguyen@s3corp.com.vn",
 	}
@@ -23,7 +23,7 @@ func TestFindFriendsByEmailWithSuccessfulCase(t *testing.T) {
 }
 
 func TestFindFriendsByEmailWithNoResult(t *testing.T) {
-	result := repo.FindFriendsByEmail("test@test.com")
+	result, _ := repo.FindFriendsByEmail("test@test.com")
 	expectedResult := []string(nil)
 	assert.Equal(t, expectedResult, result)
 }
@@ -50,13 +50,13 @@ func TestFindFriendsByEmailWithInvalidEmailRequest(t *testing.T) {
 
 //2.
 func TestFindCommonFriendsByEmailsWithSuccessfulCase(t *testing.T) {
-	result := repo.FindCommonFriendsByEmails([]string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"})
+	result, _ := repo.FindCommonFriendsByEmails([]string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"})
 	expectedRs := []string{"chinh.nguyen@s3corp.com.vn"}
 	assert.Equal(t, expectedRs, result)
 }
 
 func TestFindCommonFriendsByEmailsWithEmptyResponse(t *testing.T) {
-	result := repo.FindCommonFriendsByEmails([]string{"thehaohcm@yahoo.com.vn", "thehaohcm@gmail.com"})
+	result, _ := repo.FindCommonFriendsByEmails([]string{"thehaohcm@yahoo.com.vn", "thehaohcm@gmail.com"})
 	expectedRs := []string(nil)
 	assert.Equal(t, expectedRs, result)
 }
@@ -94,13 +94,13 @@ func TestFindCommonFriendsByEmailsWithInvalidEmailRequest(t *testing.T) {
 //3.
 func TestCreateFriendConnectionWithSuccessfulCase(t *testing.T) {
 
-	result, tx := repo.CreateFriendConnection([]string{
+	result, _ := repo.CreateFriendConnection([]string{
 		"abc@def.com",
 		"abc1@def.com",
 	})
 
 	//rollback db
-	rollbackCtx(tx)
+	// rollbackCtx(tx)
 
 	assert.Equal(t, true, result)
 }
@@ -153,8 +153,7 @@ func TestCreateFriendConnectionWithExceesEmails(t *testing.T) {
 
 //4.
 func TestSubscribeFromEmailWithSuccessfulCase(t *testing.T) {
-	result, tx := repo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "chinh.nguyen@s3corp.com.vn"})
-	rollbackCtx(tx)
+	result, _ := repo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "chinh.nguyen@s3corp.com.vn"})
 	assert.Equal(t, true, result)
 }
 
@@ -190,14 +189,12 @@ func TestSubscribeFromEmailWithNilReq(t *testing.T) {
 
 //5.
 func TestBlockSubscribeByEmailWithSuccessfulCaseAndHaveNoFriend(t *testing.T) {
-	result, tx := repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "thehaohcm@gmail.com"})
-	rollbackCtx(tx)
+	result, _ := repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "thehaohcm@gmail.com"})
 	assert.Equal(t, true, result)
 }
 
 func TestBlockSubscribeByEmailWithSuccessfulCaseAndHaveFriend(t *testing.T) {
-	result, tx := repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "chinh.nguyen@s3corp.com.vn", Target: "hao.nguyen@s3corp.com.vn"})
-	rollbackCtx(tx)
+	result, _ := repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "chinh.nguyen@s3corp.com.vn", Target: "hao.nguyen@s3corp.com.vn"})
 	assert.Equal(t, true, result)
 }
 
@@ -243,25 +240,25 @@ func TestBlockSubscribeByEmailWithNilTarget(t *testing.T) {
 
 //6.
 func TestGetSubscribingEmailListByEmailWithSuccessfulCaseAndEmailInText(t *testing.T) {
-	result := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm@yahoo.com.vn", Text: "hello world, kate@example.com"})
-	expectedRs := models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{
+	result, _ := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm@yahoo.com.vn", Text: "hello world, kate@example.com"})
+	expectedRs := []string{
 		"hao.nguyen@s3corp.com.vn",
 		"kate@example.com",
-	}}
+	}
 	assert.Equal(t, expectedRs, result)
 }
 
 func TestGetSubscribingEmailListByEmailWithSuccessfulCaseNotEmailInText(t *testing.T) {
-	result := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm@yahoo.com.vn", Text: "hello world"})
-	expectedRs := models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{
+	result, _ := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm@yahoo.com.vn", Text: "hello world"})
+	expectedRs := []string{
 		"hao.nguyen@s3corp.com.vn",
-	}}
+	}
 	assert.Equal(t, expectedRs, result)
 }
 
 func TestGetSubscribingEmailListByEmailWithSuccessfulAndEmptyResponse(t *testing.T) {
-	result := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "hung.tong@s3corp.com.vn", Text: "hello world"})
-	expectedRs := models.GetSubscribingEmailListResponse{Success: false, Recipients: nil}
+	result, _ := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "hung.tong@s3corp.com.vn", Text: "hello world"})
+	expectedRs := []string{}
 	assert.Equal(t, expectedRs, result)
 }
 

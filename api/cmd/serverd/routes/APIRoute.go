@@ -1,10 +1,10 @@
 package routes
 
 import (
-	"golang_project/controllers"
-	"golang_project/docs"
-	"golang_project/repositories"
-	"golang_project/services"
+	"golang_project/api/cmd/serverd/docs"
+	"golang_project/api/internal/controllers"
+	"golang_project/api/internal/repositories"
+	"golang_project/api/internal/services"
 
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"

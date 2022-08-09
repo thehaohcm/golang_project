@@ -1,7 +1,7 @@
-package test
+package repositories
 
 import (
-	"golang_project/models"
+	"golang_project/api/internal/models"
 
 	"github.com/stretchr/testify/mock"
 )

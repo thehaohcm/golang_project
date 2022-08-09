@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"golang_project/models"
-	"golang_project/services"
+	"golang_project/api/internal/models"
+	"golang_project/api/internal/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

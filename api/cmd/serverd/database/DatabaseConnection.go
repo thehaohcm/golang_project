@@ -1,10 +1,24 @@
-package utils
+package database
 
 import (
 	"database/sql"
 	"fmt"
 	"sync"
+
+	_ "github.com/lib/pq"
 )
+
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "postgres"
+	password = "123456"
+	dbname   = "golang_project"
+)
+
+var psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
+	"password=%s dbname=%s sslmode=disable",
+	host, port, user, password, dbname)
 
 var lock = &sync.Mutex{}
 
@@ -29,7 +43,7 @@ func GetInstance() *sql.DB {
 }
 
 func connectDatabase() *sql.DB {
-	db, err := sql.Open("sqlite3", "C:/Users/hao.nguyen/Desktop/golang_project/golang_project.db")
+	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
 	}

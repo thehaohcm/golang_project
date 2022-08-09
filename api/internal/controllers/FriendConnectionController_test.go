@@ -1,17 +1,19 @@
-package test
+package controllers
 
 import (
 	"encoding/json"
-	"golang_project/models"
-	"golang_project/routes"
-	test "golang_project/test/mock"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
+	"golang_project/api/cmd/serverd/docs"
+	"golang_project/api/internal/models"
+
+	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 type ContextMock struct {
@@ -20,7 +22,7 @@ type ContextMock struct {
 
 //1.
 func TestCreateFriendConnectionSuccessfulCase(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/createConnection", strings.NewReader("{\"friends\":[\"fda@yahoo.com.vn\",\"hsa@s3corp.com.vn\"]}"))
@@ -47,7 +49,7 @@ func TestCreateFriendConnectionSuccessfulCase(t *testing.T) {
 }
 
 func TestCreateFriendConnectionWithEmptyBody(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/createConnection", strings.NewReader("{\"friends\":[]"))
@@ -63,7 +65,7 @@ func TestCreateFriendConnectionWithEmptyBody(t *testing.T) {
 }
 
 func TestCreateFriendConnectionWithNoFriendEmail(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/createConnection", nil)
@@ -79,7 +81,7 @@ func TestCreateFriendConnectionWithNoFriendEmail(t *testing.T) {
 }
 
 func TestCreateFriendConnectionWithOnlyOneEmail(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/createConnection", strings.NewReader("{\"friends\":[\"thehaohcm@yahoo.com.vn\"]"))
@@ -96,7 +98,7 @@ func TestCreateFriendConnectionWithOnlyOneEmail(t *testing.T) {
 
 //2.
 func TestShowFriendsByEmailSuccessfulCode(t *testing.T) {
-	router := routes.SetupRouter()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showFriendsByEmail", strings.NewReader("{\"email\":\"thehaohcm@yahoo.com.vn\"}"))
@@ -124,7 +126,7 @@ func TestShowFriendsByEmailSuccessfulCode(t *testing.T) {
 }
 
 func TestShowFriendsByEmailEmptyBody(t *testing.T) {
-	router := routes.SetupRouter()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showFriendsByEmail", nil)
@@ -141,7 +143,7 @@ func TestShowFriendsByEmailEmptyBody(t *testing.T) {
 }
 
 func TestShowFriendsByEmailWrongBody(t *testing.T) {
-	router := routes.SetupRouter()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showFriendsByEmail", strings.NewReader("{}"))
@@ -159,7 +161,7 @@ func TestShowFriendsByEmailWrongBody(t *testing.T) {
 
 //3.
 func TestShowCommonFriendListSuccessfulCode(t *testing.T) {
-	router := routes.SetupRouter()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showCommonFriendList", strings.NewReader(`{
@@ -191,7 +193,7 @@ func TestShowCommonFriendListSuccessfulCode(t *testing.T) {
 }
 
 func TestShowCommonFriendListEmptyBody(t *testing.T) {
-	router := routes.SetupRouter()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showCommonFriendList", nil)
@@ -208,7 +210,7 @@ func TestShowCommonFriendListEmptyBody(t *testing.T) {
 }
 
 func TestShowCommonFriendListWrongBody(t *testing.T) {
-	router := routes.SetupRouter()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showCommonFriendList", strings.NewReader("{}"))
@@ -226,7 +228,7 @@ func TestShowCommonFriendListWrongBody(t *testing.T) {
 
 //4.
 func TestSubscribeFromEmailSuccessfulCase(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/subscribeFromEmail", strings.NewReader(`{
@@ -255,7 +257,7 @@ func TestSubscribeFromEmailSuccessfulCase(t *testing.T) {
 }
 
 func TestSubscribeFromEmailFailCaseEmptyTarget(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/subscribeFromEmail", strings.NewReader(`{
@@ -273,7 +275,7 @@ func TestSubscribeFromEmailFailCaseEmptyTarget(t *testing.T) {
 }
 
 func TestSubscribeFromEmailFailCaseEmptyRequestor(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/subscribeFromEmail", strings.NewReader(`{
@@ -291,7 +293,7 @@ func TestSubscribeFromEmailFailCaseEmptyRequestor(t *testing.T) {
 }
 
 func TestSubscribeFromEmailFailCaseEmptyBody(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/subscribeFromEmail", nil)
@@ -308,7 +310,7 @@ func TestSubscribeFromEmailFailCaseEmptyBody(t *testing.T) {
 
 //5.
 func TestBlockSubscribeByEmailSuccessfulCase(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/blockSubscribeByEmail", strings.NewReader(`{
@@ -337,7 +339,7 @@ func TestBlockSubscribeByEmailSuccessfulCase(t *testing.T) {
 }
 
 func TestBlockSubscribeByEmailFailCaseEmptyTarget(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/blockSubscribeByEmail", strings.NewReader(`{
@@ -355,7 +357,7 @@ func TestBlockSubscribeByEmailFailCaseEmptyTarget(t *testing.T) {
 }
 
 func TestBlockSubscribeByEmailFailCaseEmptyRequestor(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/blockSubscribeByEmail", strings.NewReader(`{
@@ -373,7 +375,7 @@ func TestBlockSubscribeByEmailFailCaseEmptyRequestor(t *testing.T) {
 }
 
 func TestBlockSubscribeByEmailFailCaseEmptyBody(t *testing.T) {
-	router := test.SetupRouterForTesting()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/blockSubscribeByEmail", nil)
@@ -390,7 +392,7 @@ func TestBlockSubscribeByEmailFailCaseEmptyBody(t *testing.T) {
 
 // 6.
 func TestShowSubscribingEmailListByEmailSuccessfulCode(t *testing.T) {
-	router := routes.SetupRouter()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showSubscribingEmailListByEmail", strings.NewReader("{\"sender\": \"thehaohcm@yahoo.com.vn\",\"text\": \"Hello World! kate@example.com\"}"))
@@ -417,7 +419,7 @@ func TestShowSubscribingEmailListByEmailSuccessfulCode(t *testing.T) {
 }
 
 func TestShowSubscribingEmailListByEmailEmptyBody(t *testing.T) {
-	router := routes.SetupRouter()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showSubscribingEmailListByEmail", nil)
@@ -434,7 +436,7 @@ func TestShowSubscribingEmailListByEmailEmptyBody(t *testing.T) {
 }
 
 func TestShowSubscribingEmailListByEmailWrongBody(t *testing.T) {
-	router := routes.SetupRouter()
+	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
 	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showSubscribingEmailListByEmail", strings.NewReader("{}"))
@@ -448,4 +450,78 @@ func TestShowSubscribingEmailListByEmailWrongBody(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Equal(t, "", w.Body.String())
+}
+
+type ServiceMock struct {
+	mock.Mock
+}
+
+func (s *ServiceMock) CreateConnection(request models.FriendConnectionRequest) models.FriendConnectionResponse {
+	if len(request.Friends) > 0 {
+		return models.FriendConnectionResponse{Success: true}
+	}
+	return models.FriendConnectionResponse{Success: false}
+}
+func (s *ServiceMock) GetFriendConnection(request models.FriendListRequest) models.FriendListResponse {
+	if request.Email != "" {
+		return models.FriendListResponse{Success: false}
+	}
+	return models.FriendListResponse{Success: true, Friends: []string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"}, Count: 2}
+}
+func (s *ServiceMock) ShowCommonFriendList(request models.CommonFriendListRequest) models.CommonFriendListResponse {
+	if len(request.Friends) > 0 {
+		return models.CommonFriendListResponse{Success: true}
+	}
+	return models.CommonFriendListResponse{}
+}
+func (s *ServiceMock) SubscribeFromEmail(request models.SubscribeRequest) models.SubscribeResponse {
+	if request.Requestor != "" && request.Target != "" {
+		return models.SubscribeResponse{Success: true}
+	}
+	return models.SubscribeResponse{}
+}
+func (s *ServiceMock) BlockSubscribeByEmail(request models.BlockSubscribeRequest) models.BlockSubscribeResponse {
+	if request.Requestor != "" && request.Target != "" {
+		return models.BlockSubscribeResponse{Success: true}
+	}
+	return models.BlockSubscribeResponse{}
+}
+func (s *ServiceMock) GetSubscribingEmailListByEmail(request models.GetSubscribingEmailListRequest) models.GetSubscribingEmailListResponse {
+	if request.Sender != "" && request.Text != "" {
+		return models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{"abc@gmail.com"}}
+	}
+	return models.GetSubscribingEmailListResponse{}
+}
+
+func SetupRouterForTesting() *gin.Engine {
+	serv := &ServiceMock{}
+	controller := New(serv)
+
+	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	api := router.Group("/api")
+	{
+		v1 := api.Group("/v1")
+		{
+			//1. Done
+			v1.POST("/friends/createConnection", controller.CreateFriendConnection)
+
+			//2. Done
+			v1.POST("/friends/showFriendsByEmail", controller.GetFriendListByEmail)
+
+			//3. Done
+			v1.POST("/friends/showCommonFriendList", controller.ShowCommonFriendList)
+
+			//4. Done
+			v1.POST("/friends/subscribeFromEmail", controller.SubscribeFromEmail)
+
+			//5. Done
+			v1.POST("/friends/blockSubscribeByEmail", controller.BlockSubscribeByEmail)
+
+			//6. Done
+			v1.POST("/friends/showSubscribingEmailListByEmail", controller.GetSubscribingEmailListByEmail)
+		}
+	}
+	return router
 }

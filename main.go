@@ -1,7 +1,7 @@
 package main
 
 import (
-	"golang_project/routes"
+	"golang_project/api/cmd/serverd/routes"
 )
 
 func main() {

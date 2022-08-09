@@ -1,6 +1,9 @@
 package utils
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 func IsEmailValid(e string) bool {
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
@@ -33,4 +36,15 @@ func GetDifference(slice1 []string, slice2 []string) []string {
 	}
 
 	return diff
+}
+
+func CheckValidEmails(emails []string) {
+	if emails == nil {
+		panic("empty request")
+	}
+	for _, email := range emails {
+		if strings.TrimSpace(email) == "" || !IsEmailValid(email) {
+			panic("invalid request")
+		}
+	}
 }
