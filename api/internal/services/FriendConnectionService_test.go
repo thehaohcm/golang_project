@@ -3,7 +3,6 @@ package services
 import (
 	"testing"
 
-	"golang_project/api/internal/controllers"
 	"golang_project/api/internal/models"
 	"golang_project/api/internal/repositories"
 
@@ -13,7 +12,6 @@ import (
 var (
 	friendConnectionRepository repositories.FriendConnectionRepository = repositories.New()
 	friendConnectionService    FriendConnectionService                 = New(friendConnectionRepository)
-	friendConnectionController controllers.FriendConnectionController  = controllers.New(friendConnectionService)
 )
 
 //1.

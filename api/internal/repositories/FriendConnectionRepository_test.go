@@ -100,7 +100,7 @@ func TestCreateFriendConnectionWithSuccessfulCase(t *testing.T) {
 	})
 
 	//rollback db
-	// rollbackCtx(tx)
+	rollbackCtx(tx)
 
 	assert.Equal(t, true, result)
 }
