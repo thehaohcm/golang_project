@@ -19,7 +19,7 @@ NOTICE: unfortunately, currently it is not running properly, I need to look into
 
 After built and run successfully, these containers can be run (except for the Migrate container), now you can access the project's Swagger URL by web browser: http://localhost:8080/swagger/index.html
 
-<img src="image=https://github.com/thehaohcm/golang_project/blob/master/asserts/swagger-screenshot.png">
+<img src="https://github.com/thehaohcm/golang_project/blob/master/asserts/swagger-screenshot.png">
 
 Now you can check them out and test these APIs without using another API request application (such as Postman or curl)
 
