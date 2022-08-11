@@ -42,7 +42,7 @@ definitions:
 info:
   contact: {}
 paths:
-  /friends/blockSubscribeUpdateByEmail:
+  /friends/blockSubscribeByEmail:
     post:
       consumes:
       - application/json
@@ -138,7 +138,7 @@ paths:
       summary: ping example
       tags:
       - Friend API
-  /friends/subscribeUpdateByEmail:
+  /friends/subscribeFromEmail:
     post:
       consumes:
       - application/json

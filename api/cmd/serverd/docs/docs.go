@@ -16,7 +16,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/friends/blockSubscribeUpdateByEmail": {
+        "/friends/blockSubscribeByEmail": {
             "post": {
                 "description": "Requirement 5: As a user, I need an API to block updates from an email address.",
                 "consumes": [
@@ -151,7 +151,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/friends/subscribeUpdateByEmail": {
+        "/friends/subscribeFromEmail": {
             "post": {
                 "description": "Requirement 4: As a user, I need an API to subscribe to updates from an email address.",
                 "consumes": [

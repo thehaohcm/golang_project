@@ -94,6 +94,8 @@ func (svc *service) GetSubscribingEmailListByEmail(request models.GetSubscribing
 	response.Recipients, err = svc.repository.GetSubscribingEmailListByEmail(request)
 	if err != nil {
 		panic(err)
+	} else {
+		response.Success = true
 	}
 	return response
 }

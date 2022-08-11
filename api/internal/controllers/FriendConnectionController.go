@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"golang_project/api/cmd/serverd/utils"
 	"golang_project/api/internal/models"
 	"golang_project/api/internal/services"
 	"net/http"
@@ -30,7 +31,7 @@ func New(service services.FriendConnectionService) FriendConnectionController {
 // @BasePath /api/v1
 
 // PingExample godoc
-// @Summary ping example
+// @Summary Create a friend connection
 // @Schemes
 // @Description Requirement 1: As a user, I need an API to create a friend connection between two email addresses.
 // @Tags Friend API
@@ -39,23 +40,28 @@ func New(service services.FriendConnectionService) FriendConnectionController {
 // @Param   Request body models.FriendConnectionRequest true "Create a friend connection between 2 user email"
 // @Router /friends/createConnection [post]
 func (ctl *controller) CreateFriendConnection(c *gin.Context) {
-	var newFriendConnection models.FriendConnectionRequest
-	if err := c.BindJSON(&newFriendConnection); err != nil {
+	var request models.FriendConnectionRequest
+	if err := c.BindJSON(&request); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	if len(newFriendConnection.Friends) != 2 {
+	if len(request.Friends) != 2 {
 		c.IndentedJSON(http.StatusBadRequest, nil)
 		return
 	}
 
-	response := ctl.service.CreateConnection(newFriendConnection)
+	if valid, err := utils.CheckValidEmails(request.Friends); !valid || err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	response := ctl.service.CreateConnection(request)
 	c.IndentedJSON(http.StatusOK, response)
 }
 
 // PingExample godoc
-// @Summary ping example
+// @Summary Get Friend list by email
 // @Schemes
 // @Description Requirement 2: As a user, I need an API to retrieve the friends list for an email address.
 // @Tags Friend API
@@ -75,12 +81,17 @@ func (ctl *controller) GetFriendListByEmail(c *gin.Context) {
 		return
 	}
 
+	if valid, err := utils.CheckValidEmails([]string{request.Email}); !valid || err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
 	response := ctl.service.GetFriendConnection(request)
 	c.IndentedJSON(http.StatusOK, response)
 }
 
 // PingExample godoc
-// @Summary ping example
+// @Summary Show common Friend list
 // @Schemes
 // @Description Requirement 3: As a user, I need an API to retrieve the common friends list between two email addresses.
 // @Tags Friend API
@@ -100,19 +111,24 @@ func (ctl *controller) ShowCommonFriendList(c *gin.Context) {
 		return
 	}
 
+	if valid, err := utils.CheckValidEmails(request.Friends); !valid || err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
 	response := ctl.service.ShowCommonFriendList(request)
 	c.IndentedJSON(http.StatusOK, response)
 }
 
 // PingExample godoc
-// @Summary ping example
+// @Summary Create a subscribe from email
 // @Schemes
 // @Description Requirement 4: As a user, I need an API to subscribe to updates from an email address.
 // @Tags Friend API
 // @Accept json
 // @Produce json
 // @Param   Request body models.SubscribeRequest true "Subscribe to updates from an email address"
-// @Router /friends/subscribeUpdateByEmail [post]
+// @Router /friends/subscribeFromEmail [post]
 func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 	var request models.SubscribeRequest
 	if err := c.BindJSON(&request); err != nil {
@@ -125,19 +141,24 @@ func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 		return
 	}
 
+	if valid, err := utils.CheckValidEmails([]string{request.Requestor, request.Target}); !valid || err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
 	response := ctl.service.SubscribeFromEmail(request)
 	c.IndentedJSON(http.StatusOK, response)
 }
 
 // PingExample godoc
-// @Summary ping example
+// @Summary Block subscribe by email
 // @Schemes
 // @Description Requirement 5: As a user, I need an API to block updates from an email address.
 // @Tags Friend API
 // @Accept json
 // @Produce json
 // @Param   Request body models.BlockSubscribeRequest true "Block updates from an email address"
-// @Router /friends/blockSubscribeUpdateByEmail [post]
+// @Router /friends/blockSubscribeByEmail [post]
 func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 	var request models.BlockSubscribeRequest
 	if err := c.BindJSON(&request); err != nil {
@@ -150,12 +171,17 @@ func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 		return
 	}
 
+	if valid, err := utils.CheckValidEmails([]string{request.Requestor, request.Target}); !valid || err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
 	response := ctl.service.BlockSubscribeByEmail(request)
 	c.IndentedJSON(http.StatusOK, response)
 }
 
 // PingExample godoc
-// @Summary ping example
+// @Summary Get Subscribing email list by email
 // @Schemes
 // @Description Requirement 6: As a user, I need an API to retrieve all email addresses that can receive updates from an email address.
 // @Tags Friend API
@@ -171,6 +197,11 @@ func (ctl *controller) GetSubscribingEmailListByEmail(c *gin.Context) {
 	}
 
 	if request.Sender == "" || request.Text == "" {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	if valid, err := utils.CheckValidEmails([]string{request.Sender}); !valid || err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}

@@ -3,6 +3,7 @@ package services
 import (
 	"testing"
 
+	"golang_project/api/cmd/serverd/database"
 	"golang_project/api/internal/models"
 	"golang_project/api/internal/repositories"
 
@@ -10,11 +11,12 @@ import (
 )
 
 var (
-	friendConnectionRepository repositories.FriendConnectionRepository = repositories.New()
+	db                                                                 = database.GetInstance()
+	friendConnectionRepository repositories.FriendConnectionRepository = repositories.New(db)
 	friendConnectionService    FriendConnectionService                 = New(friendConnectionRepository)
 )
 
-//1.
+// 1.
 func TestFriendConnectionSuccessfulCase(t *testing.T) {
 	repoMock := &repositories.FriendConnectionRepoMock{}
 	// repoMock.On("CreateConnection", test.AnythingOfType("*map[string]interface{}")).Return(true, nil)
@@ -33,7 +35,7 @@ func TestFriendConnectionFailCase(t *testing.T) {
 	assert.Equal(t, expectedRs, result)
 }
 
-//2.
+// 2.
 func TestShowFriendsByEmailSuccessfulCase(t *testing.T) {
 
 	request := models.FriendListRequest{
@@ -54,12 +56,12 @@ func TestShowFriendsByEmailSuccessfulCase(t *testing.T) {
 
 func TestShowFriendsByEmailEmptyModel(t *testing.T) {
 	defer func() {
-		if r := recover(); r != nil {
-			msg := r.(string)
-			assert.Equal(t, "invalid request", msg)
+		if r := recover(); r == nil {
+			t.Errorf("the function doesn't panic")
 		}
 	}()
 	friendConnectionService.GetFriendConnection(models.FriendListRequest{})
+
 }
 
 func TestShowFriendsByEmailWithEmptyResponse(t *testing.T) {
@@ -78,7 +80,7 @@ func TestShowFriendsByEmailWithEmptyResponse(t *testing.T) {
 	assert.Equal(t, exp, response)
 }
 
-//3.
+// 3.
 func TestShowCommonFriendListSuccessfulCase(t *testing.T) {
 
 	request := models.CommonFriendListRequest{
@@ -99,9 +101,8 @@ func TestShowCommonFriendListSuccessfulCase(t *testing.T) {
 
 func TestShowCommonFriendListWithInvalidEmail(t *testing.T) {
 	defer func() {
-		if r := recover(); r != nil {
-			msg := r.(string)
-			assert.Equal(t, "invalid request", msg)
+		if r := recover(); r == nil {
+			t.Errorf("the function is not panic")
 		}
 	}()
 	friendConnectionService.ShowCommonFriendList(models.CommonFriendListRequest{Friends: []string{"hao.nguyen"}})
@@ -115,7 +116,7 @@ func TestShowCommonFriendListEmptyModel(t *testing.T) {
 	assert.Equal(t, exp, response)
 }
 
-//4.
+// 4.
 func TestSubscribeFromEmailSuccessfulCase(t *testing.T) {
 	repoMock := &repositories.FriendConnectionRepoMock{}
 	// repoMock.On("SubscribeFromEmail", test.AnythingOfType("models.SubscribeRequest")).Return(true, nil).Once()
@@ -152,7 +153,7 @@ func TestSubscribeFromEmailWithEmptyTarget(t *testing.T) {
 	assert.Equal(t, expectedRs, result)
 }
 
-//5.
+// 5.
 func TestBlockSubscribeByEmailSuccessfulCase(t *testing.T) {
 	repoMock := &repositories.FriendConnectionRepoMock{}
 	// repoMock.On("BlockSubscribeByEmail", test.AnythingOfType("models.BlockSubscribeRequest")).Return(true, nil).Once()
@@ -188,7 +189,7 @@ func TestBlockSubscribeByEmailWithEmptyRequestor(t *testing.T) {
 	assert.Equal(t, expectedRs, result)
 }
 
-//6.
+// 6.
 func TestGetSubscribingEmailListWithEmailSuccessfulCase(t *testing.T) {
 
 	model := models.GetSubscribingEmailListRequest{
@@ -218,7 +219,7 @@ func TestGetSubscribingEmailListWithEmailFailCase(t *testing.T) {
 	response := friendConnectionService.GetSubscribingEmailListByEmail(model)
 
 	exp := models.GetSubscribingEmailListResponse{
-		Success:    false,
+		Success:    true,
 		Recipients: nil,
 	}
 	assert.Equal(t, exp, response)
@@ -234,9 +235,8 @@ func TestGetSubscribingEmailListWithEmailEmptyModel(t *testing.T) {
 
 func TestGetSubscribingEmailListWithInvalidEmail(t *testing.T) {
 	defer func() {
-		if r := recover(); r != nil {
-			msg := r.(string)
-			assert.Equal(t, "invalid request", msg)
+		if r := recover(); r == nil {
+			t.Errorf("the function is not panic")
 		}
 	}()
 	friendConnectionService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm", Text: "abc"})
@@ -244,9 +244,8 @@ func TestGetSubscribingEmailListWithInvalidEmail(t *testing.T) {
 
 func TestGetSubscribingEmailListWithNilSender(t *testing.T) {
 	defer func() {
-		if r := recover(); r != nil {
-			msg := r.(string)
-			assert.Equal(t, "invalid request", msg)
+		if r := recover(); r == nil {
+			t.Errorf("the function is not panic")
 		}
 	}()
 	friendConnectionService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Text: "abc"})
@@ -254,6 +253,6 @@ func TestGetSubscribingEmailListWithNilSender(t *testing.T) {
 
 func TestGetSubscribingEmailListWithEmptyReponse(t *testing.T) {
 	response := friendConnectionService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "hung.tong@s3corp.com.vn", Text: "abc"})
-	expRs := models.GetSubscribingEmailListResponse{Success: false, Recipients: nil}
+	expRs := models.GetSubscribingEmailListResponse{Success: true, Recipients: nil}
 	assert.Equal(t, expRs, response)
 }

@@ -4,8 +4,37 @@ version: '3.8'
 # Define services
 services:
 
+  ##db service
+  db:
+    container_name: db
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+    ports:
+      - '5432:5432'
+    volumes: 
+      - ./postgres-data:/var/lib/postgresql/data
+    networks:
+      backend:
+        aliases:
+          - database
+  migrate:
+    image: migrate/migrate:v4.15.2
+    networks:
+      - backend
+    links:
+      - db
+    volumes:
+      - ./data:/migrations
+    command: -path=/migrations -database postgres://postgres:123456@db:5432/postgres?sslmode=disable up 3
+    # restart: on-failure
+
   # App Service
   app:
+    depends_on:
+      - db
     # Configuration for building the docker image for the service
     build:
       context: . # Use an image built from the specified dockerfile in the current directory.
@@ -15,21 +44,9 @@ services:
     restart: unless-stopped
     networks:
       - backend
-
-  ##db service
-  db:
-    image: postgres:14.1-alpine
-    restart: always
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456
-    ports:
-      - '5432:5432'
-    volumes: 
-      - db:/var/lib/postgresql/data
 volumes:
   db:
     driver: local
 networks:
   backend:
-    driver: bridge
+    # driver: bridge

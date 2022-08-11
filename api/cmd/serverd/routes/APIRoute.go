@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"golang_project/api/cmd/serverd/database"
 	"golang_project/api/cmd/serverd/docs"
 	"golang_project/api/internal/controllers"
 	"golang_project/api/internal/repositories"
@@ -12,7 +13,7 @@ import (
 )
 
 var (
-	friendConnectionRepository repositories.FriendConnectionRepository = repositories.New()
+	friendConnectionRepository repositories.FriendConnectionRepository = repositories.New(database.GetInstance())
 	friendConnectionService    services.FriendConnectionService        = services.New(friendConnectionRepository)
 	friendConnectionController controllers.FriendConnectionController  = controllers.New(friendConnectionService)
 )

@@ -20,7 +20,7 @@ type ContextMock struct {
 	JSONCalled bool
 }
 
-//1.
+// 1.
 func TestCreateFriendConnectionSuccessfulCase(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -96,7 +96,23 @@ func TestCreateFriendConnectionWithOnlyOneEmail(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-//2.
+func TestCreateFriendConnectionWithInvalidEmail(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/createConnection", strings.NewReader("{\"friends\":[\"thehaohcm\"]"))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+// 2.
 func TestShowFriendsByEmailSuccessfulCode(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -114,8 +130,8 @@ func TestShowFriendsByEmailSuccessfulCode(t *testing.T) {
 
 	exRs := models.FriendListResponse{
 		Success: true,
-		Friends: []string{"hao.nguyen@s3corp.com.vn"},
-		Count:   1,
+		Friends: []string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"},
+		Count:   2,
 	}
 	var modelRes models.FriendListResponse
 	err = json.Unmarshal(w.Body.Bytes(), &modelRes)
@@ -159,7 +175,24 @@ func TestShowFriendsByEmailWrongBody(t *testing.T) {
 	assert.Equal(t, "", w.Body.String())
 }
 
-//3.
+func TestShowFriendsByEmailWithInvalidEmail(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showFriendsByEmail", strings.NewReader("{\"email\":\"thehaohcm\"}"))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, "", w.Body.String())
+}
+
+// 3.
 func TestShowCommonFriendListSuccessfulCode(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -226,7 +259,28 @@ func TestShowCommonFriendListWrongBody(t *testing.T) {
 	assert.Equal(t, "", w.Body.String())
 }
 
-//4.
+func TestShowCommonFriendListWithInvali(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showCommonFriendList", strings.NewReader(`{
+		"friends": [
+		  "thehaohcm,"chinh.nguyen@s3corp.com.vn"
+		]
+	  }`))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, "", w.Body.String())
+}
+
+// 4.
 func TestSubscribeFromEmailSuccessfulCase(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -308,7 +362,45 @@ func TestSubscribeFromEmailFailCaseEmptyBody(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-//5.
+func TestSubscribeFromEmailWithInvalidEmailTarget(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/subscribeFromEmail", strings.NewReader(`{
+		"requestor": "lisa@example.com",
+		"target": "john"	
+		}`))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestSubscribeFromEmailWithInvalidEmailRequestor(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/subscribeFromEmail", strings.NewReader(`{
+		"requestor": "lisa",
+		"target": "john@example.com"	
+		}`))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+// 5.
 func TestBlockSubscribeByEmailSuccessfulCase(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -390,6 +482,44 @@ func TestBlockSubscribeByEmailFailCaseEmptyBody(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
+func TestBlockSubscribeByEmailFailCaseWithInvalidEmailRequestor(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/blockSubscribeByEmail", strings.NewReader(`{
+		"requestor": "lisa",
+		"target": "john@example.com"
+		}`))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestBlockSubscribeByEmailFailCaseWithInvalidEmailTarget(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/blockSubscribeByEmail", strings.NewReader(`{
+		"requestor": "lisa@example.com",
+		"target": "john"
+		}`))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
 // 6.
 func TestShowSubscribingEmailListByEmailSuccessfulCode(t *testing.T) {
 	router := SetupRouterForTesting()
@@ -452,6 +582,23 @@ func TestShowSubscribingEmailListByEmailWrongBody(t *testing.T) {
 	assert.Equal(t, "", w.Body.String())
 }
 
+func TestShowSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/friends/showSubscribingEmailListByEmail", strings.NewReader("{\"sender\": \"thehaohcm\",\"text\": \"Hello World! kate@example.com\"}"))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Equal(t, "", w.Body.String())
+}
+
 type ServiceMock struct {
 	mock.Mock
 }
@@ -463,14 +610,14 @@ func (s *ServiceMock) CreateConnection(request models.FriendConnectionRequest) m
 	return models.FriendConnectionResponse{Success: false}
 }
 func (s *ServiceMock) GetFriendConnection(request models.FriendListRequest) models.FriendListResponse {
-	if request.Email != "" {
+	if request.Email == "" {
 		return models.FriendListResponse{Success: false}
 	}
 	return models.FriendListResponse{Success: true, Friends: []string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"}, Count: 2}
 }
 func (s *ServiceMock) ShowCommonFriendList(request models.CommonFriendListRequest) models.CommonFriendListResponse {
 	if len(request.Friends) > 0 {
-		return models.CommonFriendListResponse{Success: true}
+		return models.CommonFriendListResponse{Success: true, Friends: []string{"hao.nguyen@s3corp.com.vn"}, Count: 1}
 	}
 	return models.CommonFriendListResponse{}
 }
@@ -488,6 +635,9 @@ func (s *ServiceMock) BlockSubscribeByEmail(request models.BlockSubscribeRequest
 }
 func (s *ServiceMock) GetSubscribingEmailListByEmail(request models.GetSubscribingEmailListRequest) models.GetSubscribingEmailListResponse {
 	if request.Sender != "" && request.Text != "" {
+		if request.Sender == "thehaohcm@yahoo.com.vn" && request.Text == "Hello World! kate@example.com" {
+			return models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{"hao.nguyen@s3corp.com.vn", "kate@example.com"}}
+		}
 		return models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{"abc@gmail.com"}}
 	}
 	return models.GetSubscribingEmailListResponse{}
