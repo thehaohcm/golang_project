@@ -1,7 +1,7 @@
 
 Author: Hao Nguyen
 
-<h1>Introduction</h1>\
+<h1>Introduction</h1>
 
 Hi there,
 this is my simple Golang assigment. And I'm going to show you how to setup it to run in your local machine:
