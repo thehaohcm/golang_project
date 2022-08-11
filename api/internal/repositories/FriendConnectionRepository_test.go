@@ -293,7 +293,7 @@ func TestBlockSubscribeByEmailWithSuccessfulCaseAndHaveNoFriend(t *testing.T) {
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
 	sqlMock.ExpectBegin()
-	sqlMock.ExpectExec("INSERT OR REPLACE INTO public.friends").WillReturnResult(sqlmock.NewResult(1, 1))
+	sqlMock.ExpectExec("INSERT INTO public.friends").WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 
 	result, _ := mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "thehaohcm@gmail.com"})
@@ -310,7 +310,7 @@ func TestBlockSubscribeByEmailWithSuccessfulCaseAndHaveFriend(t *testing.T) {
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
 	sqlMock.ExpectBegin()
-	sqlMock.ExpectExec("INSERT OR REPLACE INTO public.friends").WillReturnResult(sqlmock.NewResult(1, 1))
+	sqlMock.ExpectExec("INSERT INTO public.friends").WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 
 	result, _ := mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "chinh.nguyen@s3corp.com.vn", Target: "hao.nguyen@s3corp.com.vn"})
@@ -327,7 +327,7 @@ func TestBlockSubscribeByEmailInvalidEmails(t *testing.T) {
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
 	sqlMock.ExpectBegin()
-	sqlMock.ExpectExec("INSERT OR REPLACE INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
+	sqlMock.ExpectExec("INSERT INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 
 	defer func() {
@@ -357,7 +357,7 @@ func TestBlockSubscribeByEmailWithNilRequestor(t *testing.T) {
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
 	sqlMock.ExpectBegin()
-	sqlMock.ExpectExec("INSERT OR REPLACE INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
+	sqlMock.ExpectExec("INSERT INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 
 	defer func() {
@@ -378,7 +378,7 @@ func TestBlockSubscribeByEmailWithNilTarget(t *testing.T) {
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
 	sqlMock.ExpectBegin()
-	sqlMock.ExpectExec("INSERT OR REPLACE INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
+	sqlMock.ExpectExec("INSERT INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 
 	defer func() {
@@ -394,6 +394,7 @@ func TestGetSubscribingEmailListByEmailWithSuccessfulCaseAndEmailInText(t *testi
 	result, _ := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm@yahoo.com.vn", Text: "hello world, kate@example.com"})
 	expectedRs := []string{
 		"hao.nguyen@s3corp.com.vn",
+		"abc@gmail.com",
 		"kate@example.com",
 	}
 	assert.Equal(t, expectedRs, result)
@@ -402,7 +403,7 @@ func TestGetSubscribingEmailListByEmailWithSuccessfulCaseAndEmailInText(t *testi
 func TestGetSubscribingEmailListByEmailWithSuccessfulCaseNotEmailInText(t *testing.T) {
 	result, _ := repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm@yahoo.com.vn", Text: "hello world"})
 	expectedRs := []string{
-		"hao.nguyen@s3corp.com.vn",
+		"hao.nguyen@s3corp.com.vn", "abc@gmail.com",
 	}
 	assert.Equal(t, expectedRs, result)
 }

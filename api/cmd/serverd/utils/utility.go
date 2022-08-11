@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"database/sql"
 	"errors"
 	"regexp"
 	"strings"
@@ -50,19 +49,4 @@ func CheckValidEmails(emails []string) (bool, error) {
 		}
 	}
 	return true, nil
-}
-
-func RollbackCtx(tx *sql.Tx) {
-	if tx != nil {
-		err := tx.Rollback()
-		if err != nil {
-			panic(err)
-		}
-	}
-}
-
-func CommitCtx(tx *sql.Tx) {
-	if tx != nil {
-		tx.Commit()
-	}
 }

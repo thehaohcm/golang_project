@@ -203,6 +203,7 @@ func TestGetSubscribingEmailListWithEmailSuccessfulCase(t *testing.T) {
 		Success: true,
 		Recipients: []string{
 			"hao.nguyen@s3corp.com.vn",
+			"abc@gmail.com",
 			"kate@example.com",
 		},
 	}

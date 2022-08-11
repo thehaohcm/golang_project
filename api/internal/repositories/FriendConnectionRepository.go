@@ -64,7 +64,7 @@ func (repo *repository) CreateFriendConnection(emails []string) (bool, error) {
 // 2.
 func (repo *repository) FindFriendsByEmail(email string) ([]string, error) {
 	if valid, err := utils.CheckValidEmails([]string{email}); !valid {
-		return []string(nil), err
+		panic(err)
 	}
 
 	rows, err := repo.db.Query("SELECT friend_email FROM public.friends WHERE user_email=$1 AND BLOCKED=$2", email, false)
@@ -87,7 +87,7 @@ func (repo *repository) FindFriendsByEmail(email string) ([]string, error) {
 // 3.
 func (repo *repository) FindCommonFriendsByEmails(emails []string) ([]string, error) {
 	if valid, err := utils.CheckValidEmails(emails); !valid {
-		return []string(nil), err
+		panic(err)
 	}
 	sqlStatement := "SELECT friend_email FROM public.friends WHERE"
 	for _, email := range emails {
@@ -117,7 +117,7 @@ func (repo *repository) FindCommonFriendsByEmails(emails []string) ([]string, er
 // 4.
 func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (bool, error) {
 	if valid, err := utils.CheckValidEmails([]string{req.Requestor, req.Target}); !valid {
-		return valid, err
+		panic(err)
 	}
 	tx, err := repo.db.BeginTx(repo.ctx, nil)
 	if err != nil {
@@ -125,9 +125,9 @@ func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (bool, e
 	}
 	_, err = tx.Exec("INSERT INTO public.subscribers(requestor,target) VALUES ($1,$2)", req.Requestor, req.Target)
 	if err != nil {
-		err := tx.Rollback()
-		if err != nil {
-			panic(err)
+		err1 := tx.Rollback()
+		if err1 != nil {
+			panic(err1)
 		}
 		panic(err)
 	}
@@ -139,7 +139,7 @@ func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (bool, e
 // 5.
 func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) (bool, error) {
 	if valid, err := utils.CheckValidEmails([]string{req.Requestor, req.Target}); !valid {
-		return valid, err
+		panic(err)
 	}
 	tx, err := repo.db.BeginTx(repo.ctx, nil)
 	if err != nil {
@@ -166,9 +166,9 @@ func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) 
 		//if not friend, no new friend connection added
 		_, err := tx.Exec("INSERT INTO public.friends(user_email,friend_email,blocked) VALUES ($1,$2,true) ON CONFLICT (user_email,friend_email) DO UPDATE SET blocked = EXCLUDED.blocked", req.Requestor, req.Target)
 		if err != nil {
-			err := tx.Rollback()
-			if err != nil {
-				panic(err)
+			err1 := tx.Rollback()
+			if err1 != nil {
+				panic(err1)
 			}
 			panic(err)
 		}
@@ -183,7 +183,7 @@ func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) 
 
 func (repo *repository) hasFriendConnection(requestor string, target string) (bool, error) {
 	if valid, err := utils.CheckValidEmails([]string{requestor, target}); !valid {
-		return valid, err
+		panic(err)
 	}
 	rows, err := repo.db.Query("SELECT * FROM public.friends WHERE user_email=$1 AND friend_email=$2 AND BLOCKED=false", requestor, target)
 	if err != nil {
@@ -200,7 +200,7 @@ func (repo *repository) hasFriendConnection(requestor string, target string) (bo
 // 6.
 func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribingEmailListRequest) ([]string, error) {
 	if valid, err := utils.CheckValidEmails([]string{req.Sender}); !valid {
-		return []string(nil), err
+		panic(err)
 	}
 
 	//if has a friend connection
