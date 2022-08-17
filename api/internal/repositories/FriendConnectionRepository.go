@@ -11,7 +11,6 @@ import (
 	"golang_project/api/internal/pkg"
 
 	_ "github.com/lib/pq"
-	"github.com/stretchr/testify/mock"
 )
 
 type FriendConnectionRepository interface {
@@ -49,11 +48,8 @@ func (repo *repository) CreateUser(request models.CreatingUserRequest) (models.U
 	_, err = tx.Exec("INSERT INTO public.user_account(user_email) VALUES($1)", request.Email)
 
 	if err != nil {
-		err1 := tx.Rollback()
-		if err1 != nil {
-			panic(err1)
-		}
-		return models.User{}, err
+		tx.Rollback()
+		panic(err)
 	}
 
 	tx.Commit()
@@ -78,11 +74,8 @@ func (repo *repository) CreateFriendConnection(friendConnectionRequest models.Fr
 	_, err = tx.Exec("INSERT INTO public.relationship(requestor, target, is_friend) VALUES($1,$2,true),($2,$1,true) ON CONFLICT (requestor,target) DO UPDATE SET is_friend = EXCLUDED.is_friend", friendConnectionRequest.Friends[0], friendConnectionRequest.Friends[1])
 
 	if err != nil {
-		err1 := tx.Rollback()
-		if err1 != nil {
-			panic(err1)
-		}
-		return models.Relationship{}, err
+		tx.Rollback()
+		panic(err)
 	}
 
 	tx.Commit()
@@ -156,10 +149,7 @@ func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (models.
 	}
 	_, err = tx.Exec("INSERT INTO public.relationship(requestor, target, subscribed) VALUES ($1,$2,true) ON CONFLICT (requestor,target) DO UPDATE SET subscribed = EXCLUDED.subscribed", req.Requestor, req.Target)
 	if err != nil {
-		err1 := tx.Rollback()
-		if err1 != nil {
-			panic(err1)
-		}
+		tx.Rollback()
 		panic(err)
 	}
 	tx.Commit()
@@ -181,10 +171,7 @@ func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) 
 	//if A and B are friend, A no longer receive notify from B
 	_, err = tx.Exec("INSERT INTO public.relationship(requestor,target,subscribe_blocked) VALUES ($1,$2,true) ON CONFLICT (requestor,target) DO UPDATE SET subscribe_blocked = EXCLUDED.subscribe_blocked", req.Requestor, req.Target)
 	if err != nil {
-		err1 := tx.Rollback()
-		if err1 != nil {
-			panic(err1)
-		}
+		tx.Rollback()
 		panic(err)
 	}
 
@@ -202,7 +189,7 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 	var relationships []models.Relationship
 
 	//has a friend connection
-	rows, err := repo.db.Query("select requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked from public.relationship rs where rs.requestor=$1 or rs.target=$1 and is_friend=true and friend_blocked=false", req.Sender)
+	rows, err := repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND is_friend=true AND friend_blocked=false", req.Sender)
 	if err != nil {
 		panic(err)
 	}
@@ -218,7 +205,7 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 	}
 
 	//if has a friend connection, but blocked in subscribers tables
-	rows, err = repo.db.Query("select requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked from public.relationship rs where rs.requestor=$1 or rs.target=$1 and is_friend=true and subscribed=true and friend_blocked=false and subscribe_blocked=true", req.Sender)
+	rows, err = repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND is_friend=true AND subscribed=true AND friend_blocked=false AND subscribe_blocked=true", req.Sender)
 	if err != nil {
 		panic(err)
 	}
@@ -233,7 +220,7 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 	}
 
 	//if subscribed to updates
-	rows, err = repo.db.Query("select requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked from public.relationship rs where rs.target=$1 and subscribed=true and subscribe_blocked=false", req.Sender)
+	rows, err = repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE rs.target=$1 AND subscribed=true AND subscribe_blocked=false", req.Sender)
 	if err != nil {
 		panic(err)
 	}
@@ -257,48 +244,12 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 
 	//remove duplicated items
 	friends = pkg.RemoveDuplicatedItems(friends)
+	//remove requestor itself
+	friends = pkg.RemoveItemInArray(friends, req.Sender)
+
 	for _, item := range friends {
 		relationships = append(relationships, models.Relationship{Target: item})
 	}
 
 	return relationships, nil
-}
-
-type FriendConnectionRepoMock struct {
-	mock.Mock
-}
-
-func (f *FriendConnectionRepoMock) CreateUser(request models.CreatingUserRequest) (models.User, error) {
-	if valid, err := pkg.CheckValidEmail(request.Email); !valid || err != nil {
-		return models.User{}, err
-	}
-	return models.User{Email: request.Email}, nil
-}
-
-func (f *FriendConnectionRepoMock) FindFriendsByEmail(models.FriendListRequest) ([]models.Relationship, error) {
-	return []models.Relationship{}, nil
-}
-func (f *FriendConnectionRepoMock) FindCommonFriendsByEmails(request models.CommonFriendListRequest) ([]models.Relationship, error) {
-	return []models.Relationship{}, nil
-}
-func (f *FriendConnectionRepoMock) CreateFriendConnection(request models.FriendConnectionRequest) (models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmails(request.Friends); !valid || err != nil {
-		return models.Relationship{}, nil
-	}
-	return models.Relationship{}, nil
-}
-func (f *FriendConnectionRepoMock) SubscribeFromEmail(req models.SubscribeRequest) (models.Relationship, error) {
-	if len(req.Requestor) > 0 && len(req.Target) > 0 {
-		return models.Relationship{}, nil
-	}
-	return models.Relationship{}, nil
-}
-func (f *FriendConnectionRepoMock) BlockSubscribeByEmail(req models.BlockSubscribeRequest) (models.Relationship, error) {
-	if len(req.Requestor) > 0 && len(req.Target) > 0 {
-		return models.Relationship{}, nil
-	}
-	return models.Relationship{}, nil
-}
-func (f *FriendConnectionRepoMock) GetSubscribingEmailListByEmail(req models.GetSubscribingEmailListRequest) ([]models.Relationship, error) {
-	return []models.Relationship{}, nil
 }

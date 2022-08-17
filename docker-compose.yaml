@@ -4,7 +4,7 @@ version: '3.8'
 # Define services
 services:
 
-  ##db service
+  #db service
   db:
     container_name: db
     image: postgres:14.1-alpine

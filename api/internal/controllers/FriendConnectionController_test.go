@@ -697,6 +697,9 @@ func (s *ServiceMock) GetFriendConnection(request models.FriendListRequest) mode
 	return models.FriendListResponse{Success: true, Friends: []string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"}, Count: 2}
 }
 func (s *ServiceMock) ShowCommonFriendList(request models.CommonFriendListRequest) models.CommonFriendListResponse {
+	if valid, err := pkg.CheckValidEmails(request.Friends); !valid || err != nil {
+		panic("invalid email address")
+	}
 	if len(request.Friends) > 0 {
 		return models.CommonFriendListResponse{Success: true, Friends: []string{"hao.nguyen@s3corp.com.vn"}, Count: 1}
 	}
