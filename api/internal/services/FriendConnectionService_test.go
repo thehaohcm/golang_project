@@ -3,7 +3,7 @@ package services
 import (
 	"testing"
 
-	"golang_project/api/cmd/serverd/database"
+	"golang_project/api/cmd/golang_project/database"
 	"golang_project/api/internal/models"
 	"golang_project/api/internal/repositories"
 
@@ -16,7 +16,40 @@ var (
 	friendConnectionService    FriendConnectionService                 = New(friendConnectionRepository)
 )
 
-// 1.
+// external
+func TestCreateUserSuccessfulCase(t *testing.T) {
+	repoMock := &repositories.FriendConnectionRepoMock{}
+	myService := New(repoMock)
+	result := myService.CreateUser(models.CreatingUserRequest{"hao.nguyen@s3corp.com.vn"})
+	expectedRs := models.CreatingUserResponse{Success: true}
+	assert.Equal(t, expectedRs, result)
+}
+
+func TestCreateUserInvalidEmailCase(t *testing.T) {
+	repoMock := &repositories.FriendConnectionRepoMock{}
+	myService := New(repoMock)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("the function is not panic")
+		}
+	}()
+	myService.CreateUser(models.CreatingUserRequest{"hao.nguyen"})
+}
+
+func TestCreateUserNilCase(t *testing.T) {
+	repoMock := &repositories.FriendConnectionRepoMock{}
+	myService := New(repoMock)
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("the function is not panic")
+		}
+	}()
+	myService.CreateUser(models.CreatingUserRequest{})
+}
+
+// 1. TODO: cannot run successfully
 func TestFriendConnectionSuccessfulCase(t *testing.T) {
 	repoMock := &repositories.FriendConnectionRepoMock{}
 	// repoMock.On("CreateConnection", test.AnythingOfType("*map[string]interface{}")).Return(true, nil)

@@ -6,6 +6,7 @@ import (
 )
 
 type FriendConnectionService interface {
+	CreateUser(models.CreatingUserRequest) models.CreatingUserResponse
 	CreateConnection(models.FriendConnectionRequest) models.FriendConnectionResponse
 	GetFriendConnection(request models.FriendListRequest) models.FriendListResponse
 	ShowCommonFriendList(request models.CommonFriendListRequest) models.CommonFriendListResponse
@@ -24,78 +25,104 @@ func New(repo repositories.FriendConnectionRepository) FriendConnectionService {
 	}
 }
 
-func (svc *service) CreateConnection(request models.FriendConnectionRequest) models.FriendConnectionResponse {
-	var response models.FriendConnectionResponse
+func (svc *service) CreateUser(request models.CreatingUserRequest) models.CreatingUserResponse {
+	response := models.CreatingUserResponse{Success: false}
 	var err error
-	response.Success, err = svc.repository.CreateFriendConnection(request.Friends)
+	user, err := svc.repository.CreateUser(request)
 	if err != nil {
 		panic(err)
 	}
+	if user != (models.User{}) {
+		response.Success = true
+	}
 	return response
+}
+
+func (svc *service) CreateConnection(request models.FriendConnectionRequest) models.FriendConnectionResponse {
+	var err error
+	model, err := svc.repository.CreateFriendConnection(request)
+	if err != nil {
+		panic(err)
+	}
+	if (model != models.Relationship{} && model.Is_friend == true) {
+		return models.FriendConnectionResponse{Success: true}
+	}
+	return models.FriendConnectionResponse{Success: false}
 }
 
 func (svc *service) GetFriendConnection(request models.FriendListRequest) models.FriendListResponse {
-	var response models.FriendListResponse
 	var err error
-	response.Friends, err = svc.repository.FindFriendsByEmail(request.Email)
+	relationships, err := svc.repository.FindFriendsByEmail(request)
 	if err != nil {
 		panic(err)
 	}
-	if response.Friends != nil && len(response.Friends) > 0 {
-		response.Success = true
-		response.Count = len(response.Friends)
+	if len(relationships) > 0 {
+		var friends []string
+		for _, relationship := range relationships {
+			friends = append(friends, relationship.Target)
+		}
+		return models.FriendListResponse{Success: true, Friends: friends, Count: len(friends)}
 	}
-	return response
+	return models.FriendListResponse{Success: false}
 }
 
 func (svc *service) ShowCommonFriendList(request models.CommonFriendListRequest) models.CommonFriendListResponse {
-	var response models.CommonFriendListResponse
 	var err error
-	if len(request.Friends) <= 0 {
-		return response
+	if len(request.Friends) == 0 {
+		return models.CommonFriendListResponse{Success: false}
 	}
-	response.Friends, err = svc.repository.FindCommonFriendsByEmails(request.Friends)
+	relationships, err := svc.repository.FindCommonFriendsByEmails(request)
 	if err != nil {
 		panic(err)
 	}
-	if response.Friends != nil {
-		response.Success = true
-		response.Count = len(response.Friends)
+	if len(relationships) > 0 {
+		var friends []string
+		for _, relationship := range relationships {
+			friends = append(friends, relationship.Target)
+		}
+		return models.CommonFriendListResponse{Success: true, Friends: friends, Count: len(friends)}
 	}
-	return response
+	return models.CommonFriendListResponse{Success: false}
 }
 
 func (svc *service) SubscribeFromEmail(request models.SubscribeRequest) models.SubscribeResponse {
-	var response models.SubscribeResponse
-	var err error
-	response.Success, err = svc.repository.SubscribeFromEmail(request)
+	relationships, err := svc.repository.SubscribeFromEmail(request)
 	if err != nil {
 		panic(err)
 	}
-	return response
+	if (relationships != models.Relationship{}) {
+		return models.SubscribeResponse{Success: true}
+	}
+	return models.SubscribeResponse{Success: false}
 }
 
 func (svc *service) BlockSubscribeByEmail(request models.BlockSubscribeRequest) models.BlockSubscribeResponse {
-	var response models.BlockSubscribeResponse
-	var err error
-	response.Success, err = svc.repository.BlockSubscribeByEmail(request)
+	relationship, err := svc.repository.BlockSubscribeByEmail(request)
 	if err != nil {
 		panic(err)
 	}
-	return response
+	if relationship.Friend_blocked == true {
+		return models.BlockSubscribeResponse{Success: true}
+	}
+	return models.BlockSubscribeResponse{Success: false}
 }
 
 func (svc *service) GetSubscribingEmailListByEmail(request models.GetSubscribingEmailListRequest) models.GetSubscribingEmailListResponse {
-	var response models.GetSubscribingEmailListResponse
+	response := models.GetSubscribingEmailListResponse{Success: false}
 	var err error
 	if request == (models.GetSubscribingEmailListRequest{}) {
 		return response
 	}
-	response.Recipients, err = svc.repository.GetSubscribingEmailListByEmail(request)
+	relationship, err := svc.repository.GetSubscribingEmailListByEmail(request)
 	if err != nil {
 		panic(err)
 	} else {
 		response.Success = true
+		var recipients []string
+		for _, re := range relationship {
+			recipients = append(recipients, re.Target)
+		}
+		response.Recipients = recipients
 	}
 	return response
 }

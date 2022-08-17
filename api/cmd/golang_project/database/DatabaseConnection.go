@@ -3,34 +3,17 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"runtime"
+	"os"
 	"sync"
 
 	_ "github.com/lib/pq"
 )
 
-var host = "127.0.0.1"
-
-func init() {
-	if runtime.GOOS == "darwin" {
-		host = "host.docker.internal"
-	}
-}
-
-const (
-	port     = 5432
-	user     = "postgres"
-	password = "123456"
-	dbname   = "golang_project"
-)
-
-var psqlInfo = fmt.Sprintf("host=%s port=%d user=%s "+
-	"password=%s dbname=%s sslmode=disable",
-	host, port, user, password, dbname)
-
 var lock = &sync.Mutex{}
 
 var db *sql.DB
+
+var dbTest *sql.DB
 
 // singleton pattern
 func GetInstance() *sql.DB {
@@ -57,16 +40,20 @@ func CloseDB() error {
 	return nil
 }
 
+func getDBInfo() string {
+	return fmt.Sprintf("host=%s port=%s user=%s "+
+		"password=%s dbname=%s sslmode=disable",
+		os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_PORT"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB_NAME"))
+}
+
 func connectDatabase() *sql.DB {
-	db, err := sql.Open("postgres", psqlInfo)
+	db, err := sql.Open("postgres", getDBInfo())
 	if err != nil {
 		panic(err)
 	}
 	fmt.Print("connected to db")
 	return db
 }
-
-var dbTest *sql.DB
 
 func GetTestDB() *sql.DB {
 	if dbTest == nil {
@@ -86,7 +73,7 @@ func GetTestDB() *sql.DB {
 }
 
 func connectTestingDatabase() *sql.DB {
-	dbTest, err := sql.Open("postgres", psqlInfo)
+	dbTest, err := sql.Open("postgres", getDBInfo())
 	if err != nil {
 		panic(err)
 	}

@@ -1,7 +1,8 @@
-package utils
+package pkg
 
 import (
 	"errors"
+	"golang_project/api/internal/models"
 	"regexp"
 	"strings"
 )
@@ -11,15 +12,15 @@ func IsEmailValid(e string) bool {
 	return emailRegex.MatchString(e)
 }
 
-func GetDifference(slice1 []string, slice2 []string) []string {
-	var diff []string
+func GetDifference(relationship1 []models.Relationship, relationship2 []models.Relationship) []models.Relationship {
+	var diff []models.Relationship
 
 	// Loop two times, first to find slice1 strings not in slice2,
 	// second loop to find slice2 strings not in slice1
 	for i := 0; i < 2; i++ {
-		for _, s1 := range slice1 {
+		for _, s1 := range relationship1 {
 			found := false
-			for _, s2 := range slice2 {
+			for _, s2 := range relationship2 {
 				if s1 == s2 {
 					found = true
 					break
@@ -32,7 +33,7 @@ func GetDifference(slice1 []string, slice2 []string) []string {
 		}
 		// Swap the slices, only if it was the first loop
 		if i == 0 {
-			slice1, slice2 = slice2, slice1
+			relationship1, relationship2 = relationship2, relationship1
 		}
 	}
 
@@ -49,4 +50,23 @@ func CheckValidEmails(emails []string) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+func CheckValidEmail(email string) (bool, error) {
+	if strings.TrimSpace(email) == "" || !IsEmailValid(email) {
+		return false, errors.New("invalid email address")
+	}
+	return true, nil
+}
+
+func RemoveDuplicatedItems(items []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, entry := range items {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			list = append(list, entry)
+		}
+	}
+	return list
 }

@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"golang_project/api/cmd/serverd/utils"
 	"golang_project/api/internal/models"
+	"golang_project/api/internal/pkg"
 	"golang_project/api/internal/services"
 	"net/http"
 
@@ -10,6 +10,7 @@ import (
 )
 
 type FriendConnectionController interface {
+	CreateUser(c *gin.Context)
 	CreateFriendConnection(c *gin.Context)
 	GetFriendListByEmail(c *gin.Context)
 	ShowCommonFriendList(c *gin.Context)
@@ -29,6 +30,31 @@ func New(service services.FriendConnectionService) FriendConnectionController {
 }
 
 // @BasePath /api/v1
+
+// PingExample godoc
+// @Summary Create an User
+// @Schemes
+// @Description Extend request: create a new user
+// @Tags User API
+// @Accept json
+// @Produce json
+// @Param   Request body models.CreatingUserRequest true "Create an User"
+// @Router /users/createUser [post]
+func (ctl *controller) CreateUser(c *gin.Context) {
+	var request models.CreatingUserRequest
+	if err := c.BindJSON(&request); err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	if valid, err := pkg.CheckValidEmail(request.Email); !valid || err != nil {
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	response := ctl.service.CreateUser(request)
+	c.IndentedJSON(http.StatusOK, response)
+}
 
 // PingExample godoc
 // @Summary Create a friend connection
@@ -51,7 +77,7 @@ func (ctl *controller) CreateFriendConnection(c *gin.Context) {
 		return
 	}
 
-	if valid, err := utils.CheckValidEmails(request.Friends); !valid || err != nil {
+	if valid, err := pkg.CheckValidEmails(request.Friends); !valid || err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -81,7 +107,7 @@ func (ctl *controller) GetFriendListByEmail(c *gin.Context) {
 		return
 	}
 
-	if valid, err := utils.CheckValidEmails([]string{request.Email}); !valid || err != nil {
+	if valid, err := pkg.CheckValidEmail(request.Email); !valid || err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -111,7 +137,7 @@ func (ctl *controller) ShowCommonFriendList(c *gin.Context) {
 		return
 	}
 
-	if valid, err := utils.CheckValidEmails(request.Friends); !valid || err != nil {
+	if valid, err := pkg.CheckValidEmails(request.Friends); !valid || err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -141,7 +167,7 @@ func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 		return
 	}
 
-	if valid, err := utils.CheckValidEmails([]string{request.Requestor, request.Target}); !valid || err != nil {
+	if valid, err := pkg.CheckValidEmails([]string{request.Requestor, request.Target}); !valid || err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -171,7 +197,7 @@ func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 		return
 	}
 
-	if valid, err := utils.CheckValidEmails([]string{request.Requestor, request.Target}); !valid || err != nil {
+	if valid, err := pkg.CheckValidEmails([]string{request.Requestor, request.Target}); !valid || err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
@@ -201,7 +227,7 @@ func (ctl *controller) GetSubscribingEmailListByEmail(c *gin.Context) {
 		return
 	}
 
-	if valid, err := utils.CheckValidEmails([]string{request.Sender}); !valid || err != nil {
+	if valid, err := pkg.CheckValidEmail(request.Sender); !valid || err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}

@@ -13,6 +13,11 @@ definitions:
           type: string
         type: array
     type: object
+  models.CreatingUserRequest:
+    properties:
+      email:
+        type: string
+    type: object
   models.FriendConnectionRequest:
     properties:
       friends:
@@ -58,7 +63,7 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: ping example
+      summary: Block subscribe by email
       tags:
       - Friend API
   /friends/createConnection:
@@ -77,7 +82,7 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: ping example
+      summary: Create a friend connection
       tags:
       - Friend API
   /friends/showCommonFriendList:
@@ -96,7 +101,7 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: ping example
+      summary: Show common Friend list
       tags:
       - Friend API
   /friends/showFriendsByEmail:
@@ -115,7 +120,7 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: ping example
+      summary: Get Friend list by email
       tags:
       - Friend API
   /friends/showSubscribingEmailListByEmail:
@@ -135,7 +140,7 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: ping example
+      summary: Get Subscribing email list by email
       tags:
       - Friend API
   /friends/subscribeFromEmail:
@@ -154,7 +159,25 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: ping example
+      summary: Create a subscribe from email
       tags:
       - Friend API
+  /users/createUser:
+    post:
+      consumes:
+      - application/json
+      description: 'Extend request: create a new user'
+      parameters:
+      - description: Create an User
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreatingUserRequest'
+      produces:
+      - application/json
+      responses: {}
+      summary: Create an User
+      tags:
+      - User API
 swagger: "2.0"

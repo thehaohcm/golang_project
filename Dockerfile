@@ -20,11 +20,10 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-WORKDIR /app/api/cmd/serverd/
-# Build the Go app
-RUN go build -o /app/main
+WORKDIR /app/api/cmd/golang_project/
 
-WORKDIR /app
+# Build the Go app
+RUN go build -o /app/api/cmd/golang_project/main
 
 # Expose port 8080 to the outside world
 EXPOSE 8080

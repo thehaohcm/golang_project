@@ -8,8 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"golang_project/api/cmd/serverd/docs"
+	"golang_project/api/internal/docs"
 	"golang_project/api/internal/models"
+	"golang_project/api/internal/pkg"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -18,6 +19,79 @@ import (
 
 type ContextMock struct {
 	JSONCalled bool
+}
+
+// external
+func TestCreateUserSuccessfulCase(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/users/createUser", strings.NewReader("{\"email\":\"fda@yahoo.com.vn\"}"))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	exRs := models.CreatingUserResponse{Success: true}
+	var modelRes models.CreatingUserResponse
+	err = json.Unmarshal(w.Body.Bytes(), &modelRes)
+	if err != nil {
+		panic(err)
+	}
+	assert.Equal(t, exRs, modelRes)
+}
+
+func TestCreateUserFailCaseWithInvalidEmail(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/users/createUser", strings.NewReader("{\"email\":\"fda\"}"))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestCreateUserFailCaseWithEmptyEmail(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/users/createUser", strings.NewReader("{\"email\":\"\"}"))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestCreateUserFailCaseWithNilBody(t *testing.T) {
+	router := SetupRouterForTesting()
+
+	w := httptest.NewRecorder()
+	req, err := http.NewRequest(http.MethodPost, "/api/v1/users/createUser", nil)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 // 1.
@@ -259,7 +333,7 @@ func TestShowCommonFriendListWrongBody(t *testing.T) {
 	assert.Equal(t, "", w.Body.String())
 }
 
-func TestShowCommonFriendListWithInvali(t *testing.T) {
+func TestShowCommonFriendListWithInvalid(t *testing.T) {
 	router := SetupRouterForTesting()
 
 	w := httptest.NewRecorder()
@@ -603,6 +677,13 @@ type ServiceMock struct {
 	mock.Mock
 }
 
+func (s *ServiceMock) CreateUser(req models.CreatingUserRequest) models.CreatingUserResponse {
+	if valid, err := pkg.CheckValidEmail(req.Email); !valid || err != nil {
+		return models.CreatingUserResponse{}
+	}
+	return models.CreatingUserResponse{Success: true}
+}
+
 func (s *ServiceMock) CreateConnection(request models.FriendConnectionRequest) models.FriendConnectionResponse {
 	if len(request.Friends) > 0 {
 		return models.FriendConnectionResponse{Success: true}
@@ -654,6 +735,9 @@ func SetupRouterForTesting() *gin.Engine {
 	{
 		v1 := api.Group("/v1")
 		{
+			//external
+			v1.POST("/users/createUser", controller.CreateUser)
+
 			//1. Done
 			v1.POST("/friends/createConnection", controller.CreateFriendConnection)
 
