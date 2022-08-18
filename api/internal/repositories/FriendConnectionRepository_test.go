@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"golang_project/api/cmd/golang_project/database"
+	"golang_project/api/internal/config"
 	"golang_project/api/internal/models"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	repo FriendConnectionRepository = New(database.GetInstance())
+	repo FriendConnectionRepository = New(config.GetDBInstance())
 )
 
 // external
@@ -620,7 +620,9 @@ func TestGetSubscribingEmailListByEmailWithSuccessfulCaseNotEmailInText(t *testi
 		)
 
 	sqlMock.ExpectQuery("SELECT (.+) FROM public.relationship rs WHERE (.+) AND subscribed=true AND subscribe_blocked=false").
-		WillReturnRows(sqlmock.NewRows([]string{"requestor", "target", "is_friend", "friend_blocked", "subscribed", "subscribe_blocked"}))
+		WillReturnRows(sqlmock.NewRows([]string{"requestor", "target", "is_friend", "friend_blocked", "subscribed", "subscribe_blocked"}).
+			AddRow("thehaohcm@yahoo.com.vn", "son.le@s3corp.com.vn", true, false, false, false),
+		)
 
 	result, _ := mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm@yahoo.com.vn", Text: "hello world"})
 	expectedRs := []models.Relationship([]models.Relationship{

@@ -1,7 +1,7 @@
 package router
 
 import (
-	"golang_project/api/cmd/golang_project/database"
+	"golang_project/api/internal/config"
 	"golang_project/api/internal/controllers"
 	"golang_project/api/internal/docs"
 	"golang_project/api/internal/repositories"
@@ -15,7 +15,7 @@ import (
 func SetupRouter() *gin.Engine {
 
 	//init variables
-	friendConnectionRepository := repositories.New(database.GetInstance())
+	friendConnectionRepository := repositories.New(config.GetDBInstance())
 	friendConnectionService := services.New(friendConnectionRepository)
 	friendConnectionController := controllers.New(friendConnectionService)
 

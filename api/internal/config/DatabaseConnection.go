@@ -1,4 +1,4 @@
-package database
+package config
 
 import (
 	"database/sql"
@@ -16,7 +16,7 @@ var db *sql.DB
 var dbTest *sql.DB
 
 // singleton pattern
-func GetInstance() *sql.DB {
+func GetDBInstance() *sql.DB {
 	if db == nil {
 		lock.Lock()
 		defer lock.Unlock()
