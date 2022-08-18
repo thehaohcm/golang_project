@@ -165,7 +165,7 @@ func TestCreateFriendConnectionWithInvalidEmail(t *testing.T) {
 
 	result, err := mockRepo.CreateFriendConnection(models.FriendConnectionRequest{Friends: []string{"test"}})
 	assert.Equal(t, models.Relationship{}, result)
-	assert.Error(t, err, errors.New("invalid email address"))
+	assert.Error(t, errors.New("invalid email address"), err)
 }
 
 func TestCreateFriendConnectionWithExceesEmails(t *testing.T) {
@@ -361,7 +361,7 @@ func TestFindCommonFriendsByEmailsWithInvalidEmailRequest(t *testing.T) {
 
 	result, err := mockRepo.FindCommonFriendsByEmails(models.CommonFriendListRequest{Friends: []string{"test"}})
 	assert.Equal(t, []models.Relationship{}, result)
-	assert.Error(t, err, errors.New("invalid email address"))
+	assert.Error(t, errors.New("invalid email address"), err)
 }
 
 // 4.
@@ -385,7 +385,7 @@ func TestSubscribeFromEmailWithSuccessfulCase(t *testing.T) {
 }
 
 func TestSubscribeFromEmailWithInvalidEmail(t *testing.T) {
-	var mockDB, sqlMock, err = sqlmock.New()
+	var mockDB, _, err = sqlmock.New()
 	if err != nil {
 		panic(err)
 	}
@@ -393,16 +393,10 @@ func TestSubscribeFromEmailWithInvalidEmail(t *testing.T) {
 
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
-	sqlMock.ExpectBegin()
-	sqlMock.ExpectExec("INSERT INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
-	sqlMock.ExpectCommit()
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	mockRepo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen@s3corp.com.vn"})
+	result, err := mockRepo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen@s3corp.com.vn"})
+	expectedResult := models.Relationship{}
+	assert.Equal(t, expectedResult, result)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestSubscribeFromEmailWithInvalidEmails(t *testing.T) {
@@ -418,12 +412,10 @@ func TestSubscribeFromEmailWithInvalidEmails(t *testing.T) {
 	sqlMock.ExpectExec("INSERT INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	mockRepo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen"})
+	result, err := mockRepo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen"})
+	expectedResult := models.Relationship{}
+	assert.Equal(t, expectedResult, result)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestSubscribeFromEmailWithNilReq(t *testing.T) {
@@ -439,12 +431,10 @@ func TestSubscribeFromEmailWithNilReq(t *testing.T) {
 	sqlMock.ExpectExec("INSERT INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	mockRepo.SubscribeFromEmail(models.SubscribeRequest{})
+	result, err := mockRepo.SubscribeFromEmail(models.SubscribeRequest{})
+	expectedResult := models.Relationship{}
+	assert.Equal(t, expectedResult, result)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestSubscribeFromEmailWithFailureAndRollback(t *testing.T) {
@@ -519,12 +509,10 @@ func TestBlockSubscribeByEmailInvalidEmails(t *testing.T) {
 	sqlMock.ExpectExec("INSERT INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen"})
+	result, err := mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen"})
+	expectedResult := models.Relationship{}
+	assert.Equal(t, expectedResult, result)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestBlockSubscribeByEmailWithNilRequest(t *testing.T) {
@@ -536,12 +524,10 @@ func TestBlockSubscribeByEmailWithNilRequest(t *testing.T) {
 
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{})
+	result, err := mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{})
+	expectedResult := models.Relationship{}
+	assert.Equal(t, expectedResult, result)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestBlockSubscribeByEmailWithNilRequestor(t *testing.T) {
@@ -557,12 +543,10 @@ func TestBlockSubscribeByEmailWithNilRequestor(t *testing.T) {
 	sqlMock.ExpectExec("INSERT INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Target: "chinh.nguyen"})
+	result, err := mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Target: "chinh.nguyen"})
+	expectedResult := models.Relationship{}
+	assert.Equal(t, expectedResult, result)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestBlockSubscribeByEmailWithNilTarget(t *testing.T) {
@@ -578,12 +562,10 @@ func TestBlockSubscribeByEmailWithNilTarget(t *testing.T) {
 	sqlMock.ExpectExec("INSERT INTO public.subscribers").WillReturnResult(sqlmock.NewResult(1, 1))
 	sqlMock.ExpectCommit()
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm"})
+	result, err := mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm"})
+	expectedResult := models.Relationship{}
+	assert.Equal(t, expectedResult, result)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestBlockSubscribeByEmailWithErrorAndRollback(t *testing.T) {
@@ -707,12 +689,10 @@ func TestGetSubscribingEmailListByEmailWithNilSender(t *testing.T) {
 
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Text: "hello world"})
+	result, err := mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Text: "hello world"})
+	expectedResult := []models.Relationship{}
+	assert.Equal(t, expectedResult, result)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestGetSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
@@ -724,10 +704,8 @@ func TestGetSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
 
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("The code did not panic")
-		}
-	}()
-	mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm", Text: "hello world"})
+	result, err := mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm", Text: "hello world"})
+	expectedResult := []models.Relationship{}
+	assert.Equal(t, expectedResult, result)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }

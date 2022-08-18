@@ -58,7 +58,6 @@ func (repo *repository) CreateUser(request models.CreatingUserRequest) (models.U
 
 // 1.
 func (repo *repository) CreateFriendConnection(friendConnectionRequest models.FriendConnectionRequest) (models.Relationship, error) {
-
 	//check empty or invalid email format
 	if len(friendConnectionRequest.Friends) != 2 {
 		return models.Relationship{}, errors.New("invalid request")
@@ -141,7 +140,7 @@ func (repo *repository) FindCommonFriendsByEmails(request models.CommonFriendLis
 // 4.
 func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (models.Relationship, error) {
 	if valid, err := pkg.CheckValidEmails([]string{req.Requestor, req.Target}); !valid {
-		panic(err)
+		return models.Relationship{}, err
 	}
 	tx, err := repo.db.BeginTx(repo.ctx, nil)
 	if err != nil {
@@ -160,7 +159,7 @@ func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (models.
 // 5.
 func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) (models.Relationship, error) {
 	if valid, err := pkg.CheckValidEmails([]string{req.Requestor, req.Target}); !valid {
-		panic(err)
+		return models.Relationship{}, err
 	}
 	tx, err := repo.db.BeginTx(repo.ctx, nil)
 	if err != nil {
@@ -183,7 +182,7 @@ func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) 
 // 6.
 func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribingEmailListRequest) ([]models.Relationship, error) {
 	if valid, err := pkg.CheckValidEmail(req.Sender); !valid {
-		panic(err)
+		return []models.Relationship{}, err
 	}
 
 	var relationships []models.Relationship

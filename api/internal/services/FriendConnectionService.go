@@ -75,14 +75,12 @@ func (svc *service) ShowCommonFriendList(request models.CommonFriendListRequest)
 	if err != nil {
 		panic(err)
 	}
-	if len(relationships) > 0 {
-		var friends []string
-		for _, relationship := range relationships {
-			friends = append(friends, relationship.Target)
-		}
-		return models.CommonFriendListResponse{Success: true, Friends: friends, Count: len(friends)}
+	var friends []string
+	for _, relationship := range relationships {
+		friends = append(friends, relationship.Target)
 	}
-	return models.CommonFriendListResponse{Success: false}
+	return models.CommonFriendListResponse{Success: true, Friends: friends, Count: len(friends)}
+
 }
 
 func (svc *service) SubscribeFromEmail(request models.SubscribeRequest) models.SubscribeResponse {

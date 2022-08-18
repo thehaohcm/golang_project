@@ -20,13 +20,14 @@ services:
 
   #migrate service
   migrate:
-    image: migrate/migrate:v4.15.2
+    image: migrate/migrate
     networks:
       - backend
     links:
       - db
     volumes:
-      - ./data/migrations/:/migrations/
+      - ./data/migrations/:/migrations
+    working_dir: /migrations
     command: -path=/migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB_NAME}?sslmode=disable up 3
     depends_on:
       - db
