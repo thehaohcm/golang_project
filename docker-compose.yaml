@@ -32,12 +32,6 @@ services:
       - db
       - app
     # restart: on-failure
-    # healthcheck:
-    #   test: ["CMD-SHELL", "pg_isready", "-d", "${POSTGRES_DB_NAME}"]
-    #   interval: 30s
-    #   timeout: 60s
-    #   retries: 5
-    #   start_period: 80s  
 
   # App Service
   app:

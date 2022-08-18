@@ -5,15 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	"golang_project/api/internal/config"
 	"golang_project/api/internal/models"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
-)
-
-var (
-	repo FriendConnectionRepository = New(config.GetDBInstance())
 )
 
 // external
@@ -256,14 +251,30 @@ func TestFindFriendsByEmailWithNoResult(t *testing.T) {
 }
 
 func TestFindFriendsByEmailWithEmptyRequest(t *testing.T) {
-	result, err := repo.FindFriendsByEmail(models.FriendListRequest{Email: ""})
+	var mockDB, _, err = sqlmock.New()
+	if err != nil {
+		panic(err)
+	}
+	defer mockDB.Close()
+
+	var mockRepo FriendConnectionRepository = New(mockDB)
+
+	result, err := mockRepo.FindFriendsByEmail(models.FriendListRequest{Email: ""})
 	expectedResult := []models.Relationship{}
 	assert.Equal(t, expectedResult, result)
 	assert.Error(t, err, errors.New("email address is emtpy"))
 }
 
 func TestFindFriendsByEmailWithInvalidEmailRequest(t *testing.T) {
-	result, err := repo.FindFriendsByEmail(models.FriendListRequest{Email: "abc"})
+	var mockDB, _, err = sqlmock.New()
+	if err != nil {
+		panic(err)
+	}
+	defer mockDB.Close()
+
+	var mockRepo FriendConnectionRepository = New(mockDB)
+
+	result, err := mockRepo.FindFriendsByEmail(models.FriendListRequest{Email: "abc"})
 	expectedResult := []models.Relationship{}
 	assert.Equal(t, expectedResult, result)
 	assert.Error(t, err, errors.New("email address is emtpy"))
@@ -312,19 +323,43 @@ func TestFindCommonFriendsByEmailsWithEmptyResponse(t *testing.T) {
 }
 
 func TestFindCommonFriendsByEmailsWithNilRequest(t *testing.T) {
-	result, err := repo.FindCommonFriendsByEmails(models.CommonFriendListRequest{})
+	var mockDB, _, err = sqlmock.New()
+	if err != nil {
+		panic(err)
+	}
+	defer mockDB.Close()
+
+	var mockRepo FriendConnectionRepository = New(mockDB)
+
+	result, err := mockRepo.FindCommonFriendsByEmails(models.CommonFriendListRequest{})
 	assert.Equal(t, []models.Relationship{}, result)
 	assert.Error(t, err, errors.New("email address is empty"))
 }
 
 func TestFindCommonFriendsByEmailsWithEmptyEmailRequest(t *testing.T) {
-	result, err := repo.FindCommonFriendsByEmails(models.CommonFriendListRequest{})
+	var mockDB, _, err = sqlmock.New()
+	if err != nil {
+		panic(err)
+	}
+	defer mockDB.Close()
+
+	var mockRepo FriendConnectionRepository = New(mockDB)
+
+	result, err := mockRepo.FindCommonFriendsByEmails(models.CommonFriendListRequest{})
 	assert.Equal(t, []models.Relationship{}, result)
 	assert.Error(t, err, errors.New("email address is emtpy"))
 }
 
 func TestFindCommonFriendsByEmailsWithInvalidEmailRequest(t *testing.T) {
-	result, err := repo.FindCommonFriendsByEmails(models.CommonFriendListRequest{Friends: []string{"test"}})
+	var mockDB, _, err = sqlmock.New()
+	if err != nil {
+		panic(err)
+	}
+	defer mockDB.Close()
+
+	var mockRepo FriendConnectionRepository = New(mockDB)
+
+	result, err := mockRepo.FindCommonFriendsByEmails(models.CommonFriendListRequest{Friends: []string{"test"}})
 	assert.Equal(t, []models.Relationship{}, result)
 	assert.Error(t, err, errors.New("invalid email address"))
 }
@@ -493,12 +528,20 @@ func TestBlockSubscribeByEmailInvalidEmails(t *testing.T) {
 }
 
 func TestBlockSubscribeByEmailWithNilRequest(t *testing.T) {
+	var mockDB, _, err = sqlmock.New()
+	if err != nil {
+		panic(err)
+	}
+	defer mockDB.Close()
+
+	var mockRepo FriendConnectionRepository = New(mockDB)
+
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("The code did not panic")
 		}
 	}()
-	repo.BlockSubscribeByEmail(models.BlockSubscribeRequest{})
+	mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{})
 }
 
 func TestBlockSubscribeByEmailWithNilRequestor(t *testing.T) {
@@ -656,19 +699,35 @@ func TestGetSubscribingEmailListByEmailWithSuccessfulAndEmptyResponse(t *testing
 }
 
 func TestGetSubscribingEmailListByEmailWithNilSender(t *testing.T) {
+	var mockDB, _, err = sqlmock.New()
+	if err != nil {
+		panic(err)
+	}
+	defer mockDB.Close()
+
+	var mockRepo FriendConnectionRepository = New(mockDB)
+
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("The code did not panic")
 		}
 	}()
-	repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Text: "hello world"})
+	mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Text: "hello world"})
 }
 
 func TestGetSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
+	var mockDB, _, err = sqlmock.New()
+	if err != nil {
+		panic(err)
+	}
+	defer mockDB.Close()
+
+	var mockRepo FriendConnectionRepository = New(mockDB)
+
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("The code did not panic")
 		}
 	}()
-	repo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm", Text: "hello world"})
+	mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm", Text: "hello world"})
 }
