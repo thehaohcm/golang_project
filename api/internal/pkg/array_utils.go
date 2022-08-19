@@ -1,5 +1,8 @@
 package pkg
 
+// RemoveDuplicatedItems function used for remove all duplicated items in a string array
+// pass a string array as parameter
+// return a string array
 func RemoveDuplicatedItems(items []string) []string {
 	keys := make(map[string]bool)
 	list := []string{}
@@ -12,6 +15,9 @@ func RemoveDuplicatedItems(items []string) []string {
 	return list
 }
 
+// RemoveItemInArray function used for remove a specific string item in a string array
+// pass a string array and a string item as paramter
+// return a string array
 func RemoveItemInArray(l []string, item string) []string {
 	for i, other := range l {
 		if other == item {

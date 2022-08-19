@@ -1,12 +1,13 @@
 package controllers
 
 import (
-	"golang_project/api/internal/models"
-	"golang_project/api/internal/pkg"
-	"golang_project/api/internal/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"golang_project/api/internal/models"
+	"golang_project/api/internal/pkg"
+	"golang_project/api/internal/services"
 )
 
 type FriendConnectionController interface {
@@ -23,6 +24,8 @@ type controller struct {
 	service services.FriendConnectionService
 }
 
+// New function used for initializing a controller
+// pass a FriendConnectionService as parameter
 func New(service services.FriendConnectionService) FriendConnectionController {
 	return &controller{
 		service: service,
@@ -40,6 +43,8 @@ func New(service services.FriendConnectionService) FriendConnectionController {
 // @Produce json
 // @Param   Request body models.CreatingUserRequest true "Create an User"
 // @Router /users/createUser [post]
+// CreateUse function works as a controller for creating an new user
+// pass a gin's context as parameter
 func (ctl *controller) CreateUser(c *gin.Context) {
 	var request models.CreatingUserRequest
 	if err := c.BindJSON(&request); err != nil {
@@ -67,8 +72,10 @@ func (ctl *controller) CreateUser(c *gin.Context) {
 // @Tags Friend API
 // @Accept json
 // @Produce json
-// @Param   Request body models.FriendConnectionRequest true "Create a friend connection between 2 user email"
+// @Param   Request body models.FriendConnectionRequest true "Create a friend connection between 2 user emails"
 // @Router /friends/createConnection [post]
+// CreateFriendConnection function works as a controller for creating friend connection between 2 user emails
+// pass a gin's context as parameter
 func (ctl *controller) CreateFriendConnection(c *gin.Context) {
 	var request models.FriendConnectionRequest
 	if err := c.BindJSON(&request); err != nil {
@@ -104,6 +111,8 @@ func (ctl *controller) CreateFriendConnection(c *gin.Context) {
 // @Produce json
 // @Param   Request body models.FriendListRequest true "Get a list of friend by user email"
 // @Router /friends/showFriendsByEmail [post]
+// GetFriendListByEmail function works as a controller for getting a friend list by an email address
+// pass a gin's context as parameter
 func (ctl *controller) GetFriendListByEmail(c *gin.Context) {
 	var request models.FriendListRequest
 	if err := c.BindJSON(&request); err != nil {
@@ -139,6 +148,8 @@ func (ctl *controller) GetFriendListByEmail(c *gin.Context) {
 // @Produce json
 // @Param   Request body models.CommonFriendListRequest true "Retrieve the common friends list between two email addresses"
 // @Router /friends/showCommonFriendList [post]
+// ShowCommonFriendList function works as a controller for getting a list of common friends between two email addresses
+// pass a gin's context as parameter
 func (ctl *controller) ShowCommonFriendList(c *gin.Context) {
 	var request models.CommonFriendListRequest
 	if err := c.BindJSON(&request); err != nil {
@@ -174,6 +185,8 @@ func (ctl *controller) ShowCommonFriendList(c *gin.Context) {
 // @Produce json
 // @Param   Request body models.SubscribeRequest true "Subscribe to updates from an email address"
 // @Router /friends/subscribeFromEmail [post]
+// SubscribeFromEmail function works as a controller for creating a subscribe from an email address to another one
+// pass a gin's context as parameter
 func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 	var request models.SubscribeRequest
 	if err := c.BindJSON(&request); err != nil {
@@ -209,6 +222,8 @@ func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 // @Produce json
 // @Param   Request body models.BlockSubscribeRequest true "Block updates from an email address"
 // @Router /friends/blockSubscribeByEmail [post]
+// BlockSubscribeByEmail function works as a controller for creating a block subscribe update from an email address to another one
+// pass a gin's context as parameter
 func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 	var request models.BlockSubscribeRequest
 	if err := c.BindJSON(&request); err != nil {
@@ -244,6 +259,8 @@ func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 // @Produce json
 // @Param   Request body models.GetSubscribingEmailListRequest true "retrieve all email addresses that can receive update from an email address"
 // @Router /friends/showSubscribingEmailListByEmail [post]
+// GetSubscribingEmailListByEmail function works as a controller for getting a list of subscribe email by an email address
+// pass a gin's context as parameter
 func (ctl *controller) GetSubscribingEmailListByEmail(c *gin.Context) {
 	var request models.GetSubscribingEmailListRequest
 	if err := c.BindJSON(&request); err != nil {

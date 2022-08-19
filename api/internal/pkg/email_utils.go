@@ -6,12 +6,17 @@ import (
 	"strings"
 )
 
+// IsEmailValid function used for checking whether an email address is valid or not
+// pass a string as parameter
+// return a boolean
 func IsEmailValid(e string) bool {
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	return emailRegex.MatchString(e)
 }
 
-// CheckValidEmails check valid for array of email address parameter
+// CheckValidEmails used for checking an array of email address parameter are valid or not
+// pass an email array as parameter
+// return an error type
 func CheckValidEmails(emails []string) error {
 	if emails == nil || len(emails) == 0 {
 		return errors.New("Email address is empty")
@@ -24,7 +29,9 @@ func CheckValidEmails(emails []string) error {
 	return nil
 }
 
-// CheckValidEmail check valid for an email address parameter
+// CheckValidEmail used for checking whether an email address parameter is valid or not
+// pass an email stirng as paramter
+// return an error type
 func CheckValidEmail(email string) error {
 	if strings.TrimSpace(email) == "" || !IsEmailValid(email) {
 		return errors.New("Invalid email address")
