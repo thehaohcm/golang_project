@@ -22,7 +22,6 @@ type ContextMock struct {
 	JSONCalled bool
 }
 
-// external
 func TestCreateUserSuccessfulCase(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -95,7 +94,6 @@ func TestCreateUserFailCaseWithNilBody(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-// 1.
 func TestCreateFriendConnectionSuccessfulCase(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -187,7 +185,6 @@ func TestCreateFriendConnectionWithInvalidEmail(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-// 2.
 func TestShowFriendsByEmailSuccessfulCode(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -267,7 +264,6 @@ func TestShowFriendsByEmailWithInvalidEmail(t *testing.T) {
 	assert.Equal(t, "", w.Body.String())
 }
 
-// 3.
 func TestShowCommonFriendListSuccessfulCode(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -355,7 +351,6 @@ func TestShowCommonFriendListWithInvalid(t *testing.T) {
 	assert.Equal(t, "", w.Body.String())
 }
 
-// 4.
 func TestSubscribeFromEmailSuccessfulCase(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -475,7 +470,6 @@ func TestSubscribeFromEmailWithInvalidEmailRequestor(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-// 5.
 func TestBlockSubscribeByEmailSuccessfulCase(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -595,7 +589,6 @@ func TestBlockSubscribeByEmailFailCaseWithInvalidEmailTarget(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-// 6.
 func TestShowSubscribingEmailListByEmailSuccessfulCode(t *testing.T) {
 	router := SetupRouterForTesting()
 
@@ -751,25 +744,18 @@ func SetupRouterForTesting() *gin.Engine {
 	{
 		v1 := api.Group("/v1")
 		{
-			//external
 			v1.POST("/users/createUser", controller.CreateUser)
 
-			//1. Done
 			v1.POST("/friends/createConnection", controller.CreateFriendConnection)
 
-			//2. Done
 			v1.POST("/friends/showFriendsByEmail", controller.GetFriendListByEmail)
 
-			//3. Done
 			v1.POST("/friends/showCommonFriendList", controller.ShowCommonFriendList)
 
-			//4. Done
 			v1.POST("/friends/subscribeFromEmail", controller.SubscribeFromEmail)
 
-			//5. Done
 			v1.POST("/friends/blockSubscribeByEmail", controller.BlockSubscribeByEmail)
 
-			//6. Done
 			v1.POST("/friends/showSubscribingEmailListByEmail", controller.GetSubscribingEmailListByEmail)
 		}
 	}

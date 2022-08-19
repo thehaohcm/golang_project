@@ -35,7 +35,9 @@ func New(db *sql.DB) FriendConnectionRepository {
 	}
 }
 
-// 1. Create user
+// CreateUser function used to insert data of a new user into user table
+// pass a CreatingUserRequest model as parameter
+// return a User model and an error type
 func (repo *repository) CreateUser(request models.CreatingUserRequest) (models.User, error) {
 	if err := pkg.CheckValidEmail(request.Email); err != nil {
 		return models.User{}, err
@@ -56,7 +58,9 @@ func (repo *repository) CreateUser(request models.CreatingUserRequest) (models.U
 	return models.User{Email: request.Email}, nil
 }
 
-// 1.
+// CreateFriendConnection function used to insert data of a new friend connection into relationship table
+// pass a FriendConnectionRequest model as parameter
+// return a Relationship model and an error type
 func (repo *repository) CreateFriendConnection(friendConnectionRequest models.FriendConnectionRequest) (models.Relationship, error) {
 	//check empty or invalid email format
 	if len(friendConnectionRequest.Friends) != 2 {
@@ -81,7 +85,9 @@ func (repo *repository) CreateFriendConnection(friendConnectionRequest models.Fr
 	return models.Relationship{Requestor: friendConnectionRequest.Friends[0], Target: friendConnectionRequest.Friends[1], IsFriend: true}, nil
 }
 
-// 2.
+// FindFriendsByEmail function used to query data from relationship table to get a list of friend emails by an email address
+// pass a FriendListRequest model as parameter
+// return an array of Relationship model and an error type
 func (repo *repository) FindFriendsByEmail(request models.FriendListRequest) ([]models.Relationship, error) {
 	if err := pkg.CheckValidEmail(request.Email); err != nil {
 		return []models.Relationship{}, err
@@ -104,7 +110,9 @@ func (repo *repository) FindFriendsByEmail(request models.FriendListRequest) ([]
 	return relationships, nil
 }
 
-// 3.
+// FindCommonFriendsByEmails function used to query data from relationship table to get a list of common friend emails between 2 email addresses
+// pass a CommonFriendListRequest model as parameter
+// return an array of Relationship model and an error type
 func (repo *repository) FindCommonFriendsByEmails(request models.CommonFriendListRequest) ([]models.Relationship, error) {
 	if err := pkg.CheckValidEmails(request.Friends); err != nil {
 		return []models.Relationship{}, err
@@ -137,7 +145,9 @@ func (repo *repository) FindCommonFriendsByEmails(request models.CommonFriendLis
 	return relationships, nil
 }
 
-// 4.
+// SubscribeFromEmail function used to insert a new subscribe connection into relationship table
+// pass a SubscribeRequest model as parameter
+// return a Relationship model and an error type
 func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (models.Relationship, error) {
 	if err := pkg.CheckValidEmails([]string{req.Requestor, req.Target}); err != nil {
 		return models.Relationship{}, err
@@ -156,7 +166,9 @@ func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (models.
 	return models.Relationship{Requestor: req.Requestor, Target: req.Target, Subscribed: true}, nil
 }
 
-// 5.
+// BlockSubscribeByEmail function used to update data in relationship table to block a subscribe connection
+// pass a BlockSubscribeRequest model as parameter
+// return a Relationship model and an error type
 func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) (models.Relationship, error) {
 	if err := pkg.CheckValidEmails([]string{req.Requestor, req.Target}); err != nil {
 		return models.Relationship{}, err
@@ -179,7 +191,9 @@ func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) 
 	return models.Relationship{Requestor: req.Requestor, Target: req.Target, FriendBlocked: true}, nil
 }
 
-// 6.
+// GetSubscribingEmailListByEmail function used to update data in relationship table to block a subscribe connection
+// pass a GetSubscribingEmailListRequest model as parameter
+// return an array of Relationship model and an error type
 func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribingEmailListRequest) ([]models.Relationship, error) {
 	if err := pkg.CheckValidEmail(req.Sender); err != nil {
 		return []models.Relationship{}, err

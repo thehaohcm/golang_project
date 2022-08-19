@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// external
 func TestCreateUserWithSuccessfulCase(t *testing.T) {
 	var mockDB, sqlMock, err = sqlmock.New()
 	if err != nil {
@@ -89,9 +88,7 @@ func TestCreateUserWithErrorAndRollback(t *testing.T) {
 	assert.Equal(t, errors.New("Error"), err)
 }
 
-// 1.
 func TestCreateFriendConnectionWithSuccessfulCase(t *testing.T) {
-
 	var mockDB, sqlMock, err = sqlmock.New()
 	if err != nil {
 		panic(err)
@@ -201,7 +198,6 @@ func TestCreateFriendConnectionWithErrorAndRollback(t *testing.T) {
 	assert.Equal(t, errors.New("Error"), err)
 }
 
-// 2.
 func TestFindFriendsByEmailWithSuccessfulCase(t *testing.T) {
 	var mockDB, sqlMock, err = sqlmock.New()
 	if err != nil {
@@ -274,7 +270,6 @@ func TestFindFriendsByEmailWithInvalidEmailRequest(t *testing.T) {
 	assert.Error(t, err, errors.New("email address is empty"))
 }
 
-// 3.
 func TestFindCommonFriendsByEmailsWithSuccessfulCase(t *testing.T) {
 
 	var mockDB, sqlMock, err = sqlmock.New()
@@ -358,7 +353,6 @@ func TestFindCommonFriendsByEmailsWithInvalidEmailRequest(t *testing.T) {
 	assert.Error(t, errors.New("Invalid email address"), err)
 }
 
-// 4.
 func TestSubscribeFromEmailWithSuccessfulCase(t *testing.T) {
 	var mockDB, sqlMock, err = sqlmock.New()
 	if err != nil {
@@ -449,7 +443,6 @@ func TestSubscribeFromEmailWithFailureAndRollback(t *testing.T) {
 	assert.IsType(t, errors.New(""), err)
 }
 
-// 5.
 func TestBlockSubscribeByEmailWithSuccessfulCaseAndHaveNoFriend(t *testing.T) {
 	var mockDB, sqlMock, err = sqlmock.New()
 	if err != nil {
@@ -576,7 +569,6 @@ func TestBlockSubscribeByEmailWithErrorAndRollback(t *testing.T) {
 	assert.IsType(t, errors.New(""), err)
 }
 
-// 6.
 func TestGetSubscribingEmailListByEmailWithSuccessfulCaseAndEmailInText(t *testing.T) {
 	var mockDB, sqlMock, err = sqlmock.New()
 	if err != nil {

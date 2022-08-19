@@ -12,9 +12,10 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+// SetupRouter function used to initilize a router for APIs
+// no paramter
+// return a pointer of gin.Engine
 func SetupRouter() *gin.Engine {
-
-	//init variables
 	friendConnectionRepository := repositories.New(config.GetDBInstance())
 	friendConnectionService := services.New(friendConnectionRepository)
 	friendConnectionController := controllers.New(friendConnectionService)
@@ -25,25 +26,18 @@ func SetupRouter() *gin.Engine {
 	{
 		v1 := api.Group("/v1")
 		{
-			//create user
 			v1.POST("/users/createUser", friendConnectionController.CreateUser)
 
-			//1. Done
 			v1.POST("/friends/createConnection", friendConnectionController.CreateFriendConnection)
 
-			//2. Done
 			v1.POST("/friends/showFriendsByEmail", friendConnectionController.GetFriendListByEmail)
 
-			//3. Done
 			v1.POST("/friends/showCommonFriendList", friendConnectionController.ShowCommonFriendList)
 
-			//4. Done
 			v1.POST("/friends/subscribeFromEmail", friendConnectionController.SubscribeFromEmail)
 
-			//5. Done
 			v1.POST("/friends/blockSubscribeByEmail", friendConnectionController.BlockSubscribeByEmail)
 
-			//6. Done
 			v1.POST("/friends/showSubscribingEmailListByEmail", friendConnectionController.GetSubscribingEmailListByEmail)
 		}
 	}

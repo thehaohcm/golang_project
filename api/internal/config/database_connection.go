@@ -18,6 +18,9 @@ var dbTest *sql.DB
 var dbInfo = "host=" + os.Getenv("POSTGRES_HOST") + " port=" + os.Getenv("POSTGRES_PORT") + " user=" + os.Getenv("POSTGRES_USER") + " " +
 	"password=" + os.Getenv("POSTGRES_PASSWORD") + " dbname=" + os.Getenv("POSTGRES_DB_NAME") + " sslmode=disable"
 
+// GetDBInstance function used to get or initialize a database connection
+// no paramter
+// return a pointer of sql.DB type
 // singleton pattern
 func GetDBInstance() *sql.DB {
 	if db == nil {
@@ -36,6 +39,9 @@ func GetDBInstance() *sql.DB {
 	return db
 }
 
+// CloseDB connection used to close an existing Database connection
+// no paramter
+// return an error type
 func CloseDB() error {
 	if db != nil {
 		return db.Close()
