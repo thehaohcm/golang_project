@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"testing"
 
 	"golang_project/api/internal/models"
@@ -14,50 +15,45 @@ import (
 func TestCreateUserSuccessfulCase(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-	result := myService.CreateUser(models.CreatingUserRequest{Email: "hao.nguyen@s3corp.com.vn"})
+	result, err := myService.CreateUser(models.CreatingUserRequest{Email: "hao.nguyen@s3corp.com.vn"})
 	expectedRs := models.CreatingUserResponse{Success: true}
 	assert.Equal(t, expectedRs, result)
+	assert.Equal(t, nil, err)
 }
 
 func TestCreateUserInvalidEmailCase(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("the function is not panic")
-		}
-	}()
-	myService.CreateUser(models.CreatingUserRequest{Email: "hao.nguyen"})
+	result, err := myService.CreateUser(models.CreatingUserRequest{Email: "hao.nguyen"})
+	assert.Equal(t, models.CreatingUserResponse{}, result)
+	assert.IsType(t, errors.New(""), err)
 }
 
 func TestCreateUserNilCase(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("the function is not panic")
-		}
-	}()
-	myService.CreateUser(models.CreatingUserRequest{})
+	result, err := myService.CreateUser(models.CreatingUserRequest{})
+	assert.Equal(t, models.CreatingUserResponse{}, result)
+	assert.IsType(t, errors.New(""), err)
 }
 
 // 1.
 func TestFriendConnectionSuccessfulCase(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-	result := myService.CreateConnection(models.FriendConnectionRequest{Friends: []string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"}})
+	result, err := myService.CreateConnection(models.FriendConnectionRequest{Friends: []string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"}})
 	expectedRs := models.FriendConnectionResponse{Success: true}
 	assert.Equal(t, expectedRs, result)
+	assert.Equal(t, nil, err)
 }
 
 func TestFriendConnectionFailCase(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-	result := myService.CreateConnection(models.FriendConnectionRequest{Friends: []string{}})
+	result, err := myService.CreateConnection(models.FriendConnectionRequest{Friends: []string{}})
 	expectedRs := models.FriendConnectionResponse{Success: false}
 	assert.Equal(t, expectedRs, result)
+	assert.Equal(t, errors.New("Email address is empty"), err)
 }
 
 // 2.
@@ -69,7 +65,7 @@ func TestShowFriendsByEmailSuccessfulCase(t *testing.T) {
 		Email: "thehaohcm@yahoo.com.vn",
 	}
 
-	response := myService.GetFriendConnection(request)
+	response, err := myService.GetFriendConnection(request)
 
 	exp := models.FriendListResponse{
 		Success: true,
@@ -79,19 +75,15 @@ func TestShowFriendsByEmailSuccessfulCase(t *testing.T) {
 		Count: 1,
 	}
 	assert.Equal(t, exp, response)
+	assert.Equal(t, nil, err)
 }
 
 func TestShowFriendsByEmailEmptyModel(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("the function doesn't panic")
-		}
-	}()
-	myService.GetFriendConnection(models.FriendListRequest{})
-
+	result, err := myService.GetFriendConnection(models.FriendListRequest{})
+	assert.Equal(t, models.FriendListResponse{}, result)
+	assert.IsType(t, errors.New(""), err)
 }
 
 func TestShowFriendsByEmailWithEmptyResponse(t *testing.T) {
@@ -102,7 +94,7 @@ func TestShowFriendsByEmailWithEmptyResponse(t *testing.T) {
 		Email: "test@test.com",
 	}
 
-	response := myService.GetFriendConnection(request)
+	response, err := myService.GetFriendConnection(request)
 
 	exp := models.FriendListResponse{
 		Success: false,
@@ -110,6 +102,7 @@ func TestShowFriendsByEmailWithEmptyResponse(t *testing.T) {
 		Count:   0,
 	}
 	assert.Equal(t, exp, response)
+	assert.Equal(t, nil, err)
 }
 
 // 3.
@@ -121,7 +114,7 @@ func TestShowCommonFriendListSuccessfulCase(t *testing.T) {
 		Friends: []string{"thehaohcm@yahoo.com.vn", "chinh.nguyen@s3corp.com.vn"},
 	}
 
-	response := myService.ShowCommonFriendList(request)
+	response, err := myService.ShowCommonFriendList(request)
 
 	exp := models.CommonFriendListResponse{
 		Success: true,
@@ -131,63 +124,65 @@ func TestShowCommonFriendListSuccessfulCase(t *testing.T) {
 		Count: 1,
 	}
 	assert.Equal(t, exp, response)
+	assert.Equal(t, nil, err)
 }
 
 func TestShowCommonFriendListWithInvalidEmail(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("the function is not panic")
-		}
-	}()
-	myService.ShowCommonFriendList(models.CommonFriendListRequest{Friends: []string{"hao.nguyen"}})
+	result, err := myService.ShowCommonFriendList(models.CommonFriendListRequest{Friends: []string{"hao.nguyen"}})
+	assert.Equal(t, models.CommonFriendListResponse{}, result)
+	assert.IsType(t, errors.New(""), err)
 }
 
 func TestShowCommonFriendListEmptyModel(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
 
-	response := myService.ShowCommonFriendList(models.CommonFriendListRequest{})
+	response, err := myService.ShowCommonFriendList(models.CommonFriendListRequest{})
 
 	exp := models.CommonFriendListResponse{}
 	assert.Equal(t, exp, response)
+	assert.Equal(t, errors.New("Email address is empty"), err)
 }
 
 // 4.
 func TestSubscribeFromEmailSuccessfulCase(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-	result := myService.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "hao.nguyen@s3corp.com.vn"})
+	result, err := myService.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "hao.nguyen@s3corp.com.vn"})
 	expectedRs := models.SubscribeResponse{Success: true}
 	assert.Equal(t, expectedRs, result)
+	assert.Equal(t, nil, err)
 }
 
 func TestSubscribeFromEmailFailCase(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-	result := myService.SubscribeFromEmail(models.SubscribeRequest{})
+	result, err := myService.SubscribeFromEmail(models.SubscribeRequest{})
 	expectedRs := models.SubscribeResponse{Success: false}
 	assert.Equal(t, expectedRs, result)
+	assert.Equal(t, nil, err)
 }
 
 func TestSubscribeFromEmailWithEmptyRequestor(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	// repoMock.On("SubscribeFromEmail", test.AnythingOfType("models.SubscribeRequest")).Return(nil).Once()
 	myService := New(repoMock)
-	result := myService.SubscribeFromEmail(models.SubscribeRequest{Target: "hao.nguyen@s3corp.com.vn"})
+	result, err := myService.SubscribeFromEmail(models.SubscribeRequest{Target: "hao.nguyen@s3corp.com.vn"})
 	expectedRs := models.SubscribeResponse{Success: false}
 	assert.Equal(t, expectedRs, result)
+	assert.Equal(t, nil, err)
 }
 
 func TestSubscribeFromEmailWithEmptyTarget(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	// repoMock.On("SubscribeFromEmail", test.AnythingOfType("models.SubscribeRequest")).Return(nil).Once()
 	myService := New(repoMock)
-	result := myService.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn"})
+	result, err := myService.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn"})
 	expectedRs := models.SubscribeResponse{Success: false}
 	assert.Equal(t, expectedRs, result)
+	assert.Equal(t, nil, err)
 }
 
 // 5.
@@ -195,45 +190,34 @@ func TestBlockSubscribeByEmailSuccessfulCase(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	// repoMock.On("BlockSubscribeByEmail", test.AnythingOfType("models.BlockSubscribeRequest")).Return(true, nil).Once()
 	myService := New(repoMock)
-	result := myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "hao.nguyen@s3corp.com.vn"})
+	result, err := myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn", Target: "hao.nguyen@s3corp.com.vn"})
 	expectedRs := models.BlockSubscribeResponse{Success: true}
 	assert.Equal(t, expectedRs, result)
+	assert.Equal(t, nil, err)
 }
 
 func TestBlockSubscribeByEmailFailCase(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("the function is not panic")
-		}
-	}()
-
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-	myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{})
+	result, err := myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{})
+	assert.Equal(t, models.BlockSubscribeResponse{}, result)
+	assert.IsType(t, errors.New(""), err)
 }
 
 func TestBlockSubscribeByEmailWithEmptyTarget(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("the function is not panic")
-		}
-	}()
-
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-	myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn"})
+	result, err := myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm@yahoo.com.vn"})
+	assert.Equal(t, models.BlockSubscribeResponse{}, result)
+	assert.IsType(t, errors.New(""), err)
 }
 
 func TestBlockSubscribeByEmailWithEmptyRequestor(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("the function is not panic")
-		}
-	}()
-
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-	myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{Target: "thehaohcm@yahoo.com.vn"})
+	result, err := myService.BlockSubscribeByEmail(models.BlockSubscribeRequest{Target: "thehaohcm@yahoo.com.vn"})
+	assert.Equal(t, models.BlockSubscribeResponse{}, result)
+	assert.IsType(t, errors.New(""), err)
 }
 
 // 6.
@@ -246,7 +230,7 @@ func TestGetSubscribingEmailListWithEmailSuccessfulCase(t *testing.T) {
 		Text:   "helloworld! kate@example.com",
 	}
 
-	response := myService.GetSubscribingEmailListByEmail(model)
+	response, err := myService.GetSubscribingEmailListByEmail(model)
 
 	exp := models.GetSubscribingEmailListResponse{
 		Success: true,
@@ -256,6 +240,7 @@ func TestGetSubscribingEmailListWithEmailSuccessfulCase(t *testing.T) {
 		},
 	}
 	assert.Equal(t, exp, response)
+	assert.Equal(t, nil, err)
 }
 
 func TestGetSubscribingEmailListWithEmailFailCase(t *testing.T) {
@@ -267,56 +252,51 @@ func TestGetSubscribingEmailListWithEmailFailCase(t *testing.T) {
 		Text:   "helloworld!",
 	}
 
-	response := myService.GetSubscribingEmailListByEmail(model)
+	response, err := myService.GetSubscribingEmailListByEmail(model)
 
 	exp := models.GetSubscribingEmailListResponse{
 		Success:    true,
 		Recipients: nil,
 	}
 	assert.Equal(t, exp, response)
+	assert.Equal(t, nil, err)
 }
 
 func TestGetSubscribingEmailListWithEmailEmptyModel(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
 
-	response := myService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{})
+	response, err := myService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{})
 
 	exp := models.GetSubscribingEmailListResponse{}
 	assert.Equal(t, exp, response)
+	assert.Equal(t, errors.New("Invalid Request"), err)
 }
 
 func TestGetSubscribingEmailListWithInvalidEmail(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("the function is not panic")
-		}
-	}()
-	myService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm", Text: "abc"})
+	result, err := myService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm", Text: "abc"})
+	assert.Equal(t, models.GetSubscribingEmailListResponse{}, result)
+	assert.IsType(t, errors.New(""), err)
 }
 
 func TestGetSubscribingEmailListWithNilSender(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("the function is not panic")
-		}
-	}()
-	myService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Text: "abc"})
+	result, err := myService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Text: "abc"})
+	assert.Equal(t, models.GetSubscribingEmailListResponse{}, result)
+	assert.IsType(t, errors.New(""), err)
 }
 
 func TestGetSubscribingEmailListWithEmptyReponse(t *testing.T) {
 	repoMock := &FriendConnectionRepoMock{}
 	myService := New(repoMock)
 
-	response := myService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "hung.tong@s3corp.com.vn", Text: "abc"})
+	response, err := myService.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "hung.tong@s3corp.com.vn", Text: "abc"})
 	expRs := models.GetSubscribingEmailListResponse{Success: true, Recipients: nil}
 	assert.Equal(t, expRs, response)
+	assert.Equal(t, nil, err)
 }
 
 type FriendConnectionRepoMock struct {
@@ -324,15 +304,15 @@ type FriendConnectionRepoMock struct {
 }
 
 func (f *FriendConnectionRepoMock) CreateUser(request models.CreatingUserRequest) (models.User, error) {
-	if valid, err := pkg.CheckValidEmail(request.Email); !valid || err != nil {
+	if err := pkg.CheckValidEmail(request.Email); err != nil {
 		return models.User{}, err
 	}
 	return models.User{Email: request.Email}, nil
 }
 
 func (f *FriendConnectionRepoMock) FindFriendsByEmail(request models.FriendListRequest) ([]models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmail(request.Email); !valid || err != nil {
-		panic("invalid email address")
+	if err := pkg.CheckValidEmail(request.Email); err != nil {
+		return []models.Relationship{}, err
 	}
 
 	if request.Email == "thehaohcm@yahoo.com.vn" {
@@ -342,8 +322,8 @@ func (f *FriendConnectionRepoMock) FindFriendsByEmail(request models.FriendListR
 }
 
 func (f *FriendConnectionRepoMock) FindCommonFriendsByEmails(request models.CommonFriendListRequest) ([]models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmails(request.Friends); !valid || err != nil {
-		panic("invalid email address")
+	if err := pkg.CheckValidEmails(request.Friends); err != nil {
+		return []models.Relationship{}, err
 	}
 	for _, item := range request.Friends {
 		if item == "thehaohcm@yahoo.com.vn" {
@@ -355,11 +335,11 @@ func (f *FriendConnectionRepoMock) FindCommonFriendsByEmails(request models.Comm
 }
 
 func (f *FriendConnectionRepoMock) CreateFriendConnection(request models.FriendConnectionRequest) (models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmails(request.Friends); !valid || err != nil {
-		return models.Relationship{}, nil
+	if err := pkg.CheckValidEmails(request.Friends); err != nil {
+		return models.Relationship{}, err
 	}
 	if len(request.Friends) > 0 {
-		return models.Relationship{Is_friend: true}, nil
+		return models.Relationship{IsFriend: true}, nil
 	}
 	return models.Relationship{}, nil
 }
@@ -372,18 +352,18 @@ func (f *FriendConnectionRepoMock) SubscribeFromEmail(req models.SubscribeReques
 }
 
 func (f *FriendConnectionRepoMock) BlockSubscribeByEmail(req models.BlockSubscribeRequest) (models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmails([]string{req.Requestor, req.Target}); !valid || err != nil {
-		panic("invalid email address")
+	if err := pkg.CheckValidEmails([]string{req.Requestor, req.Target}); err != nil {
+		return models.Relationship{}, err
 	}
 	if len(req.Requestor) > 0 && len(req.Target) > 0 {
-		return models.Relationship{Target: "hao.nguyen@s3corp.com.vn", Friend_blocked: true}, nil
+		return models.Relationship{Target: "hao.nguyen@s3corp.com.vn", FriendBlocked: true}, nil
 	}
 	return models.Relationship{}, nil
 }
 
 func (f *FriendConnectionRepoMock) GetSubscribingEmailListByEmail(req models.GetSubscribingEmailListRequest) ([]models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmail(req.Sender); !valid || err != nil {
-		panic("invalid email address")
+	if err := pkg.CheckValidEmail(req.Sender); err != nil {
+		return []models.Relationship{}, err
 	}
 	if req.Sender == "thehaohcm@yahoo.com.vn" && req.Text == "helloworld! kate@example.com" {
 		return []models.Relationship{{Target: "hao.nguyen@s3corp.com.vn"}, {Target: "kate@example.com"}}, nil

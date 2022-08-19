@@ -27,8 +27,8 @@ services:
       - db
     volumes:
       - ./data/migrations/:/migrations
-    working_dir: /migrations
-    command: -path=/migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB_NAME}?sslmode=disable up 3
+    # working_dir: /migrations
+    command: -source file:/migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB_NAME}?sslmode=disable up 3
     depends_on:
       - db
       - app

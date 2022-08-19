@@ -47,12 +47,16 @@ func (ctl *controller) CreateUser(c *gin.Context) {
 		return
 	}
 
-	if valid, err := pkg.CheckValidEmail(request.Email); !valid || err != nil {
+	if err := pkg.CheckValidEmail(request.Email); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	response := ctl.service.CreateUser(request)
+	response, err := ctl.service.CreateUser(request)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
 	c.IndentedJSON(http.StatusOK, response)
 }
 
@@ -77,12 +81,17 @@ func (ctl *controller) CreateFriendConnection(c *gin.Context) {
 		return
 	}
 
-	if valid, err := pkg.CheckValidEmails(request.Friends); !valid || err != nil {
+	if err := pkg.CheckValidEmails(request.Friends); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	response := ctl.service.CreateConnection(request)
+	response, err := ctl.service.CreateConnection(request)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, response)
 }
 
@@ -107,12 +116,17 @@ func (ctl *controller) GetFriendListByEmail(c *gin.Context) {
 		return
 	}
 
-	if valid, err := pkg.CheckValidEmail(request.Email); !valid || err != nil {
+	if err := pkg.CheckValidEmail(request.Email); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	response := ctl.service.GetFriendConnection(request)
+	response, err := ctl.service.GetFriendConnection(request)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, response)
 }
 
@@ -137,12 +151,17 @@ func (ctl *controller) ShowCommonFriendList(c *gin.Context) {
 		return
 	}
 
-	if valid, err := pkg.CheckValidEmails(request.Friends); !valid || err != nil {
+	if err := pkg.CheckValidEmails(request.Friends); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	response := ctl.service.ShowCommonFriendList(request)
+	response, err := ctl.service.ShowCommonFriendList(request)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, response)
 }
 
@@ -167,12 +186,17 @@ func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 		return
 	}
 
-	if valid, err := pkg.CheckValidEmails([]string{request.Requestor, request.Target}); !valid || err != nil {
+	if err := pkg.CheckValidEmails([]string{request.Requestor, request.Target}); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	response := ctl.service.SubscribeFromEmail(request)
+	response, err := ctl.service.SubscribeFromEmail(request)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, response)
 }
 
@@ -197,12 +221,17 @@ func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 		return
 	}
 
-	if valid, err := pkg.CheckValidEmails([]string{request.Requestor, request.Target}); !valid || err != nil {
+	if err := pkg.CheckValidEmails([]string{request.Requestor, request.Target}); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
-	response := ctl.service.BlockSubscribeByEmail(request)
+	response, err := ctl.service.BlockSubscribeByEmail(request)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, response)
 }
 
@@ -227,10 +256,16 @@ func (ctl *controller) GetSubscribingEmailListByEmail(c *gin.Context) {
 		return
 	}
 
-	if valid, err := pkg.CheckValidEmail(request.Sender); !valid || err != nil {
+	if err := pkg.CheckValidEmail(request.Sender); err != nil {
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	response := ctl.service.GetSubscribingEmailListByEmail(request)
+
+	response, err := ctl.service.GetSubscribingEmailListByEmail(request)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
 	c.IndentedJSON(http.StatusOK, response)
 }

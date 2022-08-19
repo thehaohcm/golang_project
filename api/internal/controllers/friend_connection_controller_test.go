@@ -2,19 +2,20 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
-	"golang_project/api/internal/docs"
-	"golang_project/api/internal/models"
-	"golang_project/api/internal/pkg"
-
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"golang_project/api/internal/docs"
+	"golang_project/api/internal/models"
+	"golang_project/api/internal/pkg"
 )
 
 type ContextMock struct {
@@ -677,54 +678,66 @@ type ServiceMock struct {
 	mock.Mock
 }
 
-func (s *ServiceMock) CreateUser(req models.CreatingUserRequest) models.CreatingUserResponse {
-	if valid, err := pkg.CheckValidEmail(req.Email); !valid || err != nil {
-		return models.CreatingUserResponse{}
+func (s *ServiceMock) CreateUser(req models.CreatingUserRequest) (models.CreatingUserResponse, error) {
+	if err := pkg.CheckValidEmail(req.Email); err != nil {
+		return models.CreatingUserResponse{}, err
 	}
-	return models.CreatingUserResponse{Success: true}
+	return models.CreatingUserResponse{Success: true}, nil
 }
 
-func (s *ServiceMock) CreateConnection(request models.FriendConnectionRequest) models.FriendConnectionResponse {
-	if len(request.Friends) > 0 {
-		return models.FriendConnectionResponse{Success: true}
-	}
-	return models.FriendConnectionResponse{Success: false}
-}
-func (s *ServiceMock) GetFriendConnection(request models.FriendListRequest) models.FriendListResponse {
-	if request.Email == "" {
-		return models.FriendListResponse{Success: false}
-	}
-	return models.FriendListResponse{Success: true, Friends: []string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"}, Count: 2}
-}
-func (s *ServiceMock) ShowCommonFriendList(request models.CommonFriendListRequest) models.CommonFriendListResponse {
-	if valid, err := pkg.CheckValidEmails(request.Friends); !valid || err != nil {
-		panic("invalid email address")
+func (s *ServiceMock) CreateConnection(request models.FriendConnectionRequest) (models.FriendConnectionResponse, error) {
+	if err := pkg.CheckValidEmails(request.Friends); err != nil {
+		return models.FriendConnectionResponse{Success: true}, errors.New("Invalid email address")
 	}
 	if len(request.Friends) > 0 {
-		return models.CommonFriendListResponse{Success: true, Friends: []string{"hao.nguyen@s3corp.com.vn"}, Count: 1}
+		return models.FriendConnectionResponse{Success: true}, nil
 	}
-	return models.CommonFriendListResponse{}
+	return models.FriendConnectionResponse{Success: false}, nil
 }
-func (s *ServiceMock) SubscribeFromEmail(request models.SubscribeRequest) models.SubscribeResponse {
+func (s *ServiceMock) GetFriendConnection(request models.FriendListRequest) (models.FriendListResponse, error) {
+	if err := pkg.CheckValidEmail(request.Email); err != nil {
+		return models.FriendListResponse{Success: false}, err
+	}
+	return models.FriendListResponse{Success: true, Friends: []string{"thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn"}, Count: 2}, nil
+}
+func (s *ServiceMock) ShowCommonFriendList(request models.CommonFriendListRequest) (models.CommonFriendListResponse, error) {
+	if err := pkg.CheckValidEmails(request.Friends); err != nil {
+		return models.CommonFriendListResponse{}, err
+	}
+	if len(request.Friends) > 0 {
+		return models.CommonFriendListResponse{Success: true, Friends: []string{"hao.nguyen@s3corp.com.vn"}, Count: 1}, nil
+	}
+	return models.CommonFriendListResponse{}, nil
+}
+func (s *ServiceMock) SubscribeFromEmail(request models.SubscribeRequest) (models.SubscribeResponse, error) {
+	if err := pkg.CheckValidEmails([]string{request.Requestor, request.Target}); err != nil {
+		return models.SubscribeResponse{}, err
+	}
 	if request.Requestor != "" && request.Target != "" {
-		return models.SubscribeResponse{Success: true}
+		return models.SubscribeResponse{Success: true}, nil
 	}
-	return models.SubscribeResponse{}
+	return models.SubscribeResponse{}, nil
 }
-func (s *ServiceMock) BlockSubscribeByEmail(request models.BlockSubscribeRequest) models.BlockSubscribeResponse {
+func (s *ServiceMock) BlockSubscribeByEmail(request models.BlockSubscribeRequest) (models.BlockSubscribeResponse, error) {
+	if err := pkg.CheckValidEmail(request.Requestor); err != nil {
+		return models.BlockSubscribeResponse{}, err
+	}
 	if request.Requestor != "" && request.Target != "" {
-		return models.BlockSubscribeResponse{Success: true}
+		return models.BlockSubscribeResponse{Success: true}, nil
 	}
-	return models.BlockSubscribeResponse{}
+	return models.BlockSubscribeResponse{}, nil
 }
-func (s *ServiceMock) GetSubscribingEmailListByEmail(request models.GetSubscribingEmailListRequest) models.GetSubscribingEmailListResponse {
-	if request.Sender != "" && request.Text != "" {
+func (s *ServiceMock) GetSubscribingEmailListByEmail(request models.GetSubscribingEmailListRequest) (models.GetSubscribingEmailListResponse, error) {
+	if err := pkg.CheckValidEmail(request.Sender); err != nil {
+		return models.GetSubscribingEmailListResponse{}, err
+	}
+	if request.Text != "" {
 		if request.Sender == "thehaohcm@yahoo.com.vn" && request.Text == "Hello World! kate@example.com" {
-			return models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{"hao.nguyen@s3corp.com.vn", "kate@example.com"}}
+			return models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{"hao.nguyen@s3corp.com.vn", "kate@example.com"}}, nil
 		}
-		return models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{"abc@gmail.com"}}
+		return models.GetSubscribingEmailListResponse{Success: true, Recipients: []string{"abc@gmail.com"}}, nil
 	}
-	return models.GetSubscribingEmailListResponse{}
+	return models.GetSubscribingEmailListResponse{}, nil
 }
 
 func SetupRouterForTesting() *gin.Engine {

@@ -37,7 +37,7 @@ func New(db *sql.DB) FriendConnectionRepository {
 
 // 1. Create user
 func (repo *repository) CreateUser(request models.CreatingUserRequest) (models.User, error) {
-	if valid, err := pkg.CheckValidEmail(request.Email); !valid {
+	if err := pkg.CheckValidEmail(request.Email); err != nil {
 		return models.User{}, err
 	}
 
@@ -49,7 +49,7 @@ func (repo *repository) CreateUser(request models.CreatingUserRequest) (models.U
 
 	if err != nil {
 		tx.Rollback()
-		panic(err)
+		return models.User{}, err
 	}
 
 	tx.Commit()
@@ -60,9 +60,9 @@ func (repo *repository) CreateUser(request models.CreatingUserRequest) (models.U
 func (repo *repository) CreateFriendConnection(friendConnectionRequest models.FriendConnectionRequest) (models.Relationship, error) {
 	//check empty or invalid email format
 	if len(friendConnectionRequest.Friends) != 2 {
-		return models.Relationship{}, errors.New("invalid request")
+		return models.Relationship{}, errors.New("Invalid Request")
 	}
-	if valid, err := pkg.CheckValidEmails([]string{friendConnectionRequest.Friends[0], friendConnectionRequest.Friends[1]}); !valid {
+	if err := pkg.CheckValidEmails([]string{friendConnectionRequest.Friends[0], friendConnectionRequest.Friends[1]}); err != nil {
 		return models.Relationship{}, err
 	}
 
@@ -70,26 +70,26 @@ func (repo *repository) CreateFriendConnection(friendConnectionRequest models.Fr
 	if err != nil {
 		return models.Relationship{}, err
 	}
-	_, err = tx.Exec("INSERT INTO public.relationship(requestor, target, is_friend) VALUES($1,$2,true),($2,$1,true) ON CONFLICT (requestor,target) DO UPDATE SET is_friend = EXCLUDED.is_friend", friendConnectionRequest.Friends[0], friendConnectionRequest.Friends[1])
+	_, err = tx.Exec("INSERT INTO public.relationship(requestor, target, IsFriend) VALUES($1,$2,true),($2,$1,true) ON CONFLICT (requestor,target) DO UPDATE SET IsFriend = EXCLUDED.IsFriend", friendConnectionRequest.Friends[0], friendConnectionRequest.Friends[1])
 
 	if err != nil {
 		tx.Rollback()
-		panic(err)
+		return models.Relationship{}, err
 	}
 
 	tx.Commit()
-	return models.Relationship{Requestor: friendConnectionRequest.Friends[0], Target: friendConnectionRequest.Friends[1], Is_friend: true}, nil
+	return models.Relationship{Requestor: friendConnectionRequest.Friends[0], Target: friendConnectionRequest.Friends[1], IsFriend: true}, nil
 }
 
 // 2.
 func (repo *repository) FindFriendsByEmail(request models.FriendListRequest) ([]models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmail(request.Email); !valid {
+	if err := pkg.CheckValidEmail(request.Email); err != nil {
 		return []models.Relationship{}, err
 	}
 
-	rows, err := repo.db.Query("SELECT requestor FROM public.relationship WHERE target=$1 and is_friend=true AND FRIEND_BLOCKED=false UNION SELECT target FROM public.relationship WHERE requestor=$1 and is_friend=true AND FRIEND_BLOCKED=false", request.Email)
+	rows, err := repo.db.Query("SELECT requestor FROM public.relationship WHERE target=$1 and IsFriend=true AND FriendBlocked=false UNION SELECT target FROM public.relationship WHERE requestor=$1 and IsFriend=true AND FriendBlocked=false", request.Email)
 	if err != nil {
-		panic(err)
+		return []models.Relationship{}, err
 	}
 	defer rows.Close()
 
@@ -97,7 +97,7 @@ func (repo *repository) FindFriendsByEmail(request models.FriendListRequest) ([]
 	for rows.Next() {
 		relationshipTmp := models.Relationship{Requestor: request.Email}
 		if err := rows.Scan(&relationshipTmp.Target); err != nil {
-			panic(err)
+			return []models.Relationship{}, err
 		}
 		relationships = append(relationships, relationshipTmp)
 	}
@@ -106,7 +106,7 @@ func (repo *repository) FindFriendsByEmail(request models.FriendListRequest) ([]
 
 // 3.
 func (repo *repository) FindCommonFriendsByEmails(request models.CommonFriendListRequest) ([]models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmails(request.Friends); !valid {
+	if err := pkg.CheckValidEmails(request.Friends); err != nil {
 		return []models.Relationship{}, err
 	}
 
@@ -121,7 +121,7 @@ func (repo *repository) FindCommonFriendsByEmails(request models.CommonFriendLis
 	sqlStatement := "SELECT target,count(*) FROM public.relationship where requestor in (" + dollarSignParams + ") and target not in (" + dollarSignParams + ") group by target having count(*)>1 union SELECT requestor ,count(*) FROM public.relationship where target in (" + dollarSignParams + ") and requestor not in(" + dollarSignParams + ") group by requestor having count(*)>1"
 	rows, err := repo.db.Query(sqlStatement, arg...)
 	if err != nil {
-		panic(err)
+		return []models.Relationship{}, err
 	}
 	defer rows.Close()
 
@@ -130,7 +130,7 @@ func (repo *repository) FindCommonFriendsByEmails(request models.CommonFriendLis
 		var relationship models.Relationship
 		var count int
 		if err := rows.Scan(&relationship.Target, &count); err != nil {
-			panic(err)
+			return []models.Relationship{}, err
 		}
 		relationships = append(relationships, relationship)
 	}
@@ -139,17 +139,17 @@ func (repo *repository) FindCommonFriendsByEmails(request models.CommonFriendLis
 
 // 4.
 func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmails([]string{req.Requestor, req.Target}); !valid {
+	if err := pkg.CheckValidEmails([]string{req.Requestor, req.Target}); err != nil {
 		return models.Relationship{}, err
 	}
 	tx, err := repo.db.BeginTx(repo.ctx, nil)
 	if err != nil {
-		panic(err)
+		return models.Relationship{}, err
 	}
 	_, err = tx.Exec("INSERT INTO public.relationship(requestor, target, subscribed) VALUES ($1,$2,true) ON CONFLICT (requestor,target) DO UPDATE SET subscribed = EXCLUDED.subscribed", req.Requestor, req.Target)
 	if err != nil {
 		tx.Rollback()
-		panic(err)
+		return models.Relationship{}, err
 	}
 	tx.Commit()
 
@@ -158,77 +158,77 @@ func (repo *repository) SubscribeFromEmail(req models.SubscribeRequest) (models.
 
 // 5.
 func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) (models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmails([]string{req.Requestor, req.Target}); !valid {
+	if err := pkg.CheckValidEmails([]string{req.Requestor, req.Target}); err != nil {
 		return models.Relationship{}, err
 	}
 	tx, err := repo.db.BeginTx(repo.ctx, nil)
 	if err != nil {
-		panic(err)
+		return models.Relationship{}, err
 	}
 
 	//suppose A block B:
 	//if A and B are friend, A no longer receive notify from B
-	_, err = tx.Exec("INSERT INTO public.relationship(requestor,target,subscribe_blocked) VALUES ($1,$2,true) ON CONFLICT (requestor,target) DO UPDATE SET subscribe_blocked = EXCLUDED.subscribe_blocked", req.Requestor, req.Target)
+	_, err = tx.Exec("INSERT INTO public.relationship(requestor,target,SubscribeBlocked) VALUES ($1,$2,true) ON CONFLICT (requestor,target) DO UPDATE SET SubscribeBlocked = EXCLUDED.SubscribeBlocked", req.Requestor, req.Target)
 	if err != nil {
 		tx.Rollback()
-		panic(err)
+		return models.Relationship{}, err
 	}
 
 	tx.Commit()
 
-	return models.Relationship{Requestor: req.Requestor, Target: req.Target, Friend_blocked: true}, nil
+	return models.Relationship{Requestor: req.Requestor, Target: req.Target, FriendBlocked: true}, nil
 }
 
 // 6.
 func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribingEmailListRequest) ([]models.Relationship, error) {
-	if valid, err := pkg.CheckValidEmail(req.Sender); !valid {
+	if err := pkg.CheckValidEmail(req.Sender); err != nil {
 		return []models.Relationship{}, err
 	}
 
 	var relationships []models.Relationship
 
 	//has a friend connection
-	rows, err := repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND is_friend=true AND friend_blocked=false", req.Sender)
+	rows, err := repo.db.Query("SELECT requestor, target, IsFriend, FriendBlocked, subscribed, SubscribeBlocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND IsFriend=true AND FriendBlocked=false", req.Sender)
 	if err != nil {
-		panic(err)
+		return []models.Relationship{}, err
 	}
 
 	defer rows.Close()
 	var friends []string
 	for rows.Next() {
 		var relationshipTmp models.Relationship
-		if err := rows.Scan(&relationshipTmp.Requestor, &relationshipTmp.Target, &relationshipTmp.Is_friend, &relationshipTmp.Friend_blocked, &relationshipTmp.Subscribed, &relationshipTmp.Subscribe_block); err != nil {
-			panic(err)
+		if err := rows.Scan(&relationshipTmp.Requestor, &relationshipTmp.Target, &relationshipTmp.IsFriend, &relationshipTmp.FriendBlocked, &relationshipTmp.Subscribed, &relationshipTmp.SubscribeBlock); err != nil {
+			return []models.Relationship{}, err
 		}
 		friends = append(friends, relationshipTmp.Requestor, relationshipTmp.Target)
 	}
 
 	//if has a friend connection, but blocked in subscribers tables
-	rows, err = repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND is_friend=true AND subscribed=true AND friend_blocked=false AND subscribe_blocked=true", req.Sender)
+	rows, err = repo.db.Query("SELECT requestor, target, IsFriend, FriendBlocked, subscribed, SubscribeBlocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND IsFriend=true AND subscribed=true AND FriendBlocked=false AND SubscribeBlocked=true", req.Sender)
 	if err != nil {
-		panic(err)
+		return []models.Relationship{}, err
 	}
 
 	defer rows.Close()
 	for rows.Next() {
 		var relationshipTmp models.Relationship
-		if err := rows.Scan(&relationshipTmp.Requestor, &relationshipTmp.Target, &relationshipTmp.Is_friend, &relationshipTmp.Friend_blocked, &relationshipTmp.Subscribed, &relationshipTmp.Subscribe_block); err != nil {
-			panic(err)
+		if err := rows.Scan(&relationshipTmp.Requestor, &relationshipTmp.Target, &relationshipTmp.IsFriend, &relationshipTmp.FriendBlocked, &relationshipTmp.Subscribed, &relationshipTmp.SubscribeBlock); err != nil {
+			return []models.Relationship{}, err
 		}
 		friends = append(friends, relationshipTmp.Requestor, relationshipTmp.Target)
 	}
 
 	//if subscribed to updates
-	rows, err = repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE rs.target=$1 AND subscribed=true AND subscribe_blocked=false", req.Sender)
+	rows, err = repo.db.Query("SELECT requestor, target, IsFriend, FriendBlocked, subscribed, SubscribeBlocked FROM public.relationship rs WHERE rs.target=$1 AND subscribed=true AND SubscribeBlocked=false", req.Sender)
 	if err != nil {
-		panic(err)
+		return []models.Relationship{}, err
 	}
 
 	defer rows.Close()
 	for rows.Next() {
 		var relationshipTmp models.Relationship
-		if err := rows.Scan(&relationshipTmp.Requestor, &relationshipTmp.Target, &relationshipTmp.Is_friend, &relationshipTmp.Friend_blocked, &relationshipTmp.Subscribed, &relationshipTmp.Subscribe_block); err != nil {
-			panic(err)
+		if err := rows.Scan(&relationshipTmp.Requestor, &relationshipTmp.Target, &relationshipTmp.IsFriend, &relationshipTmp.FriendBlocked, &relationshipTmp.Subscribed, &relationshipTmp.SubscribeBlock); err != nil {
+			return []models.Relationship{}, err
 		}
 		friends = append(friends, relationshipTmp.Requestor)
 	}
