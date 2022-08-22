@@ -9,7 +9,7 @@ import (
 	"golang_project/api/internal/services"
 )
 
-// FriendConnectionRepository interface declares all functions used in Controller layer
+// FriendConnectionController interface declares all functions used in Controller layer
 type FriendConnectionController interface {
 	CreateUser(c *gin.Context)
 	CreateFriendConnection(c *gin.Context)
@@ -43,7 +43,7 @@ func New(service services.FriendConnectionService) FriendConnectionController {
 // @Produce json
 // @Param   Request body models.CreatingUserRequest true "Create an User"
 // @Router /users/createUser [post]
-// CreateUse function works as a controller for creating an new user
+// CreateUser function works as a controller for creating an new user
 // pass a gin's context as parameter
 func (ctl *controller) CreateUser(c *gin.Context) {
 	var request models.CreatingUserRequest

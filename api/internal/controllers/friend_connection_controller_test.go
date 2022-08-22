@@ -17,10 +17,6 @@ import (
 	"golang_project/api/internal/pkg"
 )
 
-type ContextMock struct {
-	JSONCalled bool
-}
-
 func TestCreateUserSuccessfulCase(t *testing.T) {
 	router := SetupRouterForTesting()
 
