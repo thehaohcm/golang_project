@@ -30,6 +30,8 @@ type repository struct {
 	ctx context.Context
 }
 
+// New function used for initializing a FriendConnectionRepository
+// pass a pointer sql.DB as parameter
 func New(db *sql.DB) FriendConnectionRepository {
 	return &repository{
 		db:  db,

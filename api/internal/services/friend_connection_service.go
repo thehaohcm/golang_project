@@ -25,8 +25,9 @@ type service struct {
 	repository repositories.FriendConnectionRepository
 }
 
-// New function used for initializing a service
+// New function used for initializing a FriendConnectionService
 // pass a FriendConnectionRepository as parameter
+// return a FriendConnectionService model
 func New(repo repositories.FriendConnectionRepository) FriendConnectionService {
 	return &service{
 		repository: repo,
@@ -116,7 +117,7 @@ func (svc *service) BlockSubscribeByEmail(request models.BlockSubscribeRequest) 
 
 // GetSubscribingEmailListByEmail function works as a service function for getting a list of subscribe email by an email address
 // pass a GetSubscribingEmailListRequest model as parameter
-// return a GetSubscribingEmailListRequest model and an error type
+// return a GetSubscribingEmailListResponse model and an error type
 func (svc *service) GetSubscribingEmailListByEmail(request models.GetSubscribingEmailListRequest) (models.GetSubscribingEmailListResponse, error) {
 	response := models.GetSubscribingEmailListResponse{Success: false}
 	if request == (models.GetSubscribingEmailListRequest{}) {

@@ -24,7 +24,7 @@ type controller struct {
 	service services.FriendConnectionService
 }
 
-// New function used for initializing a controller
+// New function used for initializing a FriendConnectionController
 // pass a FriendConnectionService as parameter
 func New(service services.FriendConnectionService) FriendConnectionController {
 	return &controller{
