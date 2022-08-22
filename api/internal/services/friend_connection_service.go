@@ -37,13 +37,11 @@ func New(repo repositories.FriendConnectionRepository) FriendConnectionService {
 // pass a CreatingUserRequest model as parameter
 // return a CreatingUserResponse model and an error type
 func (svc *service) CreateUser(request models.CreatingUserRequest) (models.CreatingUserResponse, error) {
-	response := models.CreatingUserResponse{Success: false}
 	_, err := svc.repository.CreateUser(request)
 	if err != nil {
 		return models.CreatingUserResponse{}, err
 	}
-	response.Success = true
-	return response, nil
+	return models.CreatingUserResponse{Success: true}, nil
 }
 
 // CreateConnection function works as a service function for creating friend connection between 2 user emails
@@ -102,24 +100,18 @@ func (svc *service) SubscribeFromEmail(request models.SubscribeRequest) (models.
 	if err != nil {
 		return models.SubscribeResponse{}, err
 	}
-	if (relationships != models.Relationship{}) {
-		return models.SubscribeResponse{Success: true}, nil
-	}
-	return models.SubscribeResponse{Success: false}, nil
+	return models.SubscribeResponse{Success: relationships != models.Relationship{}}, nil
 }
 
 // BlockSubscribeByEmail function works as a service function for creating a block subscribe update from an email address to another one
 // pass a BlockSubscribeRequest model as parameter
 // return a BlockSubscribeResponse model and an error type
 func (svc *service) BlockSubscribeByEmail(request models.BlockSubscribeRequest) (models.BlockSubscribeResponse, error) {
-	relationship, err := svc.repository.BlockSubscribeByEmail(request)
+	_, err := svc.repository.BlockSubscribeByEmail(request)
 	if err != nil {
 		return models.BlockSubscribeResponse{}, err
 	}
-	if relationship.FriendBlocked == true {
-		return models.BlockSubscribeResponse{Success: true}, nil
-	}
-	return models.BlockSubscribeResponse{Success: false}, nil
+	return models.BlockSubscribeResponse{Success: true}, nil
 }
 
 // GetSubscribingEmailListByEmail function works as a service function for getting a list of subscribe email by an email address

@@ -252,7 +252,7 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 	//if being mentioned in the update
 	textArr := strings.Split(req.Text, " ")
 	for _, text := range textArr {
-		if pkg.IsEmailValid(text) {
+		if pkg.CheckValidEmail(text) == nil {
 			relationships = append(relationships, models.Relationship{Target: text})
 		}
 	}

@@ -9,6 +9,7 @@ import (
 	"golang_project/api/internal/services"
 )
 
+// FriendConnectionRepository interface declares all functions used in Controller layer
 type FriendConnectionController interface {
 	CreateUser(c *gin.Context)
 	CreateFriendConnection(c *gin.Context)
