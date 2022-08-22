@@ -16,7 +16,7 @@ func RemoveDuplicatedItems(items []string) []string {
 }
 
 // RemoveItemInArray function used for remove a specific string item in a string array
-// pass a string array and a string item as paramter
+// pass a string array and a string item as parameter
 // return a string array
 func RemoveItemInArray(l []string, item string) []string {
 	for i, other := range l {

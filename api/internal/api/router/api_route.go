@@ -13,7 +13,7 @@ import (
 )
 
 // SetupRouter function used to initilize a router for APIs
-// no paramter
+// no parameter
 // return a pointer of gin.Engine
 func SetupRouter() *gin.Engine {
 	friendConnectionRepository := repositories.New(config.GetDBInstance())
