@@ -30,7 +30,7 @@ func New(repo repositories.FriendConnectionRepository) FriendConnectionService {
 	}
 }
 
-// CreateUse function works as a service function for creating an new user
+// CreateUser function works as a service function for creating an new user
 // pass a CreatingUserRequest model as parameter
 // return a CreatingUserResponse model and an error type
 func (svc *service) CreateUser(request models.CreatingUserRequest) (models.CreatingUserResponse, error) {

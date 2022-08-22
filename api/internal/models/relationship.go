@@ -1,5 +1,6 @@
 package models
 
+// Relationship struct used when mapping to get a Relationship model after querying data from Relationship table in database
 type Relationship struct {
 	Requestor      string
 	Target         string
