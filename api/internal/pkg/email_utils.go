@@ -30,7 +30,7 @@ func CheckValidEmails(emails []string) error {
 }
 
 // CheckValidEmail used for checking whether an email address parameter is valid or not
-// pass an email stirng as parameter
+// pass an email string as parameter
 // return an error type
 func CheckValidEmail(email string) error {
 	if strings.TrimSpace(email) == "" || !IsEmailValid(email) {
