@@ -3,11 +3,11 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"golang_project/api/internal/models"
 	"golang_project/api/internal/pkg"
 	"golang_project/api/internal/services"
-
-	"github.com/gin-gonic/gin"
 )
 
 type FriendConnectionController interface {

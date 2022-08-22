@@ -4,11 +4,11 @@ import (
 	"errors"
 	"testing"
 
-	"golang_project/api/internal/models"
-	"golang_project/api/internal/pkg"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+
+	"golang_project/api/internal/models"
+	"golang_project/api/internal/pkg"
 )
 
 func TestCreateUserSuccessfulCase(t *testing.T) {

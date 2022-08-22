@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
+	_ "github.com/lib/pq"
+
 	"golang_project/api/internal/models"
 	"golang_project/api/internal/pkg"
-
-	_ "github.com/lib/pq"
 )
 
 type FriendConnectionRepository interface {

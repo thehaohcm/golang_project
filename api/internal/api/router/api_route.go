@@ -1,15 +1,15 @@
 package router
 
 import (
+	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"golang_project/api/internal/config"
 	"golang_project/api/internal/controllers"
 	"golang_project/api/internal/docs"
 	"golang_project/api/internal/repositories"
 	"golang_project/api/internal/services"
-
-	"github.com/gin-gonic/gin"
-	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // SetupRouter function used to initilize a router for APIs

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"testing"
 
-	"golang_project/api/internal/models"
-
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
+
+	"golang_project/api/internal/models"
 )
 
 func TestCreateUserWithSuccessfulCase(t *testing.T) {
@@ -584,7 +584,7 @@ func TestGetSubscribingEmailListByEmailWithSuccessfulCaseAndEmailInText(t *testi
 			AddRow("thehaohcm@yahoo.com.vn", "chinh.nguyen@s3corp.com.vn", true, false, false, false),
 		)
 
-	sqlMock.ExpectQuery("SELECT (.+) FROM public.relationship rs WHERE (.+) AND is_friend=true AND subscribed=true AND friend_blocked=false AND subscribe_blocked=true").
+	sqlMock.ExpectQuery("SELECT (.+) FROM public.relationship rs WHERE (.+) AND is_friend=true AND subscribed=true AND friend_blocked=false AND subscribe_blocked=false").
 		WillReturnRows(sqlmock.NewRows([]string{"requestor", "target", "is_friend", "friend_blocked", "subscribed", "subscribe_blocked"}).
 			AddRow("thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn", true, false, false, false).
 			AddRow("thehaohcm@yahoo.com.vn", "chinh.nguyen@s3corp.com.vn", true, false, false, false),
@@ -617,16 +617,14 @@ func TestGetSubscribingEmailListByEmailWithSuccessfulCaseNotEmailInText(t *testi
 			AddRow("thehaohcm@yahoo.com.vn", "chinh.nguyen@s3corp.com.vn", true, false, false, false),
 		)
 
-	sqlMock.ExpectQuery("SELECT (.+) FROM public.relationship rs WHERE (.+) AND is_friend=true AND subscribed=true AND friend_blocked=false AND subscribe_blocked=true").
+	sqlMock.ExpectQuery("SELECT (.+) FROM public.relationship rs WHERE (.+) AND is_friend=true AND subscribed=true AND friend_blocked=false AND subscribe_blocked=false").
 		WillReturnRows(sqlmock.NewRows([]string{"requestor", "target", "is_friend", "friend_blocked", "subscribed", "subscribe_blocked"}).
 			AddRow("thehaohcm@yahoo.com.vn", "hao.nguyen@s3corp.com.vn", true, false, false, false).
 			AddRow("thehaohcm@yahoo.com.vn", "chinh.nguyen@s3corp.com.vn", true, false, false, false),
 		)
 
 	sqlMock.ExpectQuery("SELECT (.+) FROM public.relationship rs WHERE (.+) AND subscribed=true AND subscribe_blocked=false").
-		WillReturnRows(sqlmock.NewRows([]string{"requestor", "target", "is_friend", "friend_blocked", "subscribed", "subscribe_blocked"}).
-			AddRow("thehaohcm@yahoo.com.vn", "son.le@s3corp.com.vn", true, false, false, false),
-		)
+		WillReturnRows(sqlmock.NewRows([]string{"requestor", "target", "is_friend", "friend_blocked", "subscribed", "subscribe_blocked"}))
 
 	result, _ := mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm@yahoo.com.vn", Text: "hello world"})
 	expectedRs := []models.Relationship([]models.Relationship{
@@ -655,7 +653,7 @@ func TestGetSubscribingEmailListByEmailWithSuccessfulAndEmptyResponse(t *testing
 		WillReturnRows(sqlmock.NewRows([]string{"requestor", "target", "is_friend", "friend_blocked", "subscribed", "subscribe_blocked"}))
 
 	result, _ := mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "hung.tong@s3corp.com.vn", Text: "hello world"})
-	expectedRs := []models.Relationship(nil)
+	expectedRs := []models.Relationship{}
 	assert.Equal(t, expectedRs, result)
 }
 

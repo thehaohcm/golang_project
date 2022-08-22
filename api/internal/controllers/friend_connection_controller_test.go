@@ -227,7 +227,7 @@ func TestShowFriendsByEmailEmptyBody(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "", w.Body.String())
+	assert.Equal(t, "{\"error\":\"invalid request\"}", w.Body.String())
 }
 
 func TestShowFriendsByEmailWrongBody(t *testing.T) {
@@ -244,7 +244,7 @@ func TestShowFriendsByEmailWrongBody(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "", w.Body.String())
+	assert.Equal(t, "{\"error\":\"Invalid Request, the model must not be empty\"}", w.Body.String())
 }
 
 func TestShowFriendsByEmailWithInvalidEmail(t *testing.T) {
@@ -261,7 +261,7 @@ func TestShowFriendsByEmailWithInvalidEmail(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "", w.Body.String())
+	assert.Equal(t, "{\"error\":\"Invalid email address\"}", w.Body.String())
 }
 
 func TestShowCommonFriendListSuccessfulCode(t *testing.T) {
@@ -310,7 +310,7 @@ func TestShowCommonFriendListEmptyBody(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "", w.Body.String())
+	assert.Equal(t, "{\"error\":\"invalid request\"}", w.Body.String())
 }
 
 func TestShowCommonFriendListWrongBody(t *testing.T) {
@@ -327,7 +327,7 @@ func TestShowCommonFriendListWrongBody(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "", w.Body.String())
+	assert.Equal(t, "{\"error\":\"Invalid Request, the friends list must have over 1 item\"}", w.Body.String())
 }
 
 func TestShowCommonFriendListWithInvalid(t *testing.T) {
@@ -348,7 +348,7 @@ func TestShowCommonFriendListWithInvalid(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "", w.Body.String())
+	assert.Equal(t, "{\"error\":\"invalid character 'c' after array element\"}", w.Body.String())
 }
 
 func TestSubscribeFromEmailSuccessfulCase(t *testing.T) {
@@ -630,7 +630,7 @@ func TestShowSubscribingEmailListByEmailEmptyBody(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "", w.Body.String())
+	assert.Equal(t, "{\"error\":\"invalid request\"}", w.Body.String())
 }
 
 func TestShowSubscribingEmailListByEmailWrongBody(t *testing.T) {
@@ -647,7 +647,7 @@ func TestShowSubscribingEmailListByEmailWrongBody(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "", w.Body.String())
+	assert.Equal(t, "{\"error\":\"Invalid request, both Sender and Text must not be null\"}", w.Body.String())
 }
 
 func TestShowSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
@@ -664,7 +664,7 @@ func TestShowSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "", w.Body.String())
+	assert.Equal(t, "{\"error\":\"Invalid email address\"}", w.Body.String())
 }
 
 type ServiceMock struct {
