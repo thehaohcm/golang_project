@@ -218,7 +218,7 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 	}
 
 	//if has a friend connection, but blocked in subscribers tables
-	rows, err = repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND is_friend=true AND subscribed=true AND friend_blocked=false AND subscribe_blocked=false", req.Sender)
+	rows, err = repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE (rs.requestor=$1 OR rs.target=$1) AND is_friend=true AND subscribed=true AND friend_blocked=false AND subscribe_blocked=false", req.Sender)
 	if err != nil {
 		return []models.Relationship{}, err
 	}
