@@ -6,7 +6,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-
 	"golang_project/api/internal/models"
 	"golang_project/api/internal/pkg"
 )

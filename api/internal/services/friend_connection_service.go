@@ -8,6 +8,9 @@ import (
 	"golang_project/api/internal/repositories"
 )
 
+// FriendConnectionService interface declares all functions used in Service layer
+// and also decouple when invoking these function from Controller layer to Service layer
+// this interface is also useful when we create all mock Service functions for testing
 type FriendConnectionService interface {
 	CreateUser(models.CreatingUserRequest) (models.CreatingUserResponse, error)
 	CreateConnection(models.FriendConnectionRequest) (models.FriendConnectionResponse, error)
@@ -38,9 +41,8 @@ func (svc *service) CreateUser(request models.CreatingUserRequest) (models.Creat
 	_, err := svc.repository.CreateUser(request)
 	if err != nil {
 		return models.CreatingUserResponse{}, err
-	} else {
-		response.Success = true
 	}
+	response.Success = true
 	return response, nil
 }
 

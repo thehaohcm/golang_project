@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-
 	"golang_project/api/internal/docs"
 	"golang_project/api/internal/models"
 	"golang_project/api/internal/pkg"

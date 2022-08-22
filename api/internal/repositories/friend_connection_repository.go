@@ -8,11 +8,13 @@ import (
 	"strings"
 
 	_ "github.com/lib/pq"
-
 	"golang_project/api/internal/models"
 	"golang_project/api/internal/pkg"
 )
 
+// FriendConnectionRepository interface declares all functions used in Repository layer
+// and also decouple when invoking these function from Service layer to Repository layer
+// this interface is also useful when we create all mock Repository functions for testing
 type FriendConnectionRepository interface {
 	CreateUser(models.CreatingUserRequest) (models.User, error)
 	FindFriendsByEmail(models.FriendListRequest) ([]models.Relationship, error)

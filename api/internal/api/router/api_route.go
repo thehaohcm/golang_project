@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-
 	"golang_project/api/internal/config"
 	"golang_project/api/internal/controllers"
 	"golang_project/api/internal/docs"
