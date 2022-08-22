@@ -3,11 +3,11 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
 	"golang_project/api/internal/models"
 	"golang_project/api/internal/pkg"
 	"golang_project/api/internal/services"
+
+	"github.com/gin-gonic/gin"
 )
 
 type FriendConnectionController interface {
@@ -48,18 +48,18 @@ func New(service services.FriendConnectionService) FriendConnectionController {
 func (ctl *controller) CreateUser(c *gin.Context) {
 	var request models.CreatingUserRequest
 	if err := c.BindJSON(&request); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if err := pkg.CheckValidEmail(request.Email); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	response, err := ctl.service.CreateUser(request)
 	if err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	c.IndentedJSON(http.StatusOK, response)
@@ -79,23 +79,23 @@ func (ctl *controller) CreateUser(c *gin.Context) {
 func (ctl *controller) CreateFriendConnection(c *gin.Context) {
 	var request models.FriendConnectionRequest
 	if err := c.BindJSON(&request); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if len(request.Friends) != 2 {
-		c.IndentedJSON(http.StatusBadRequest, nil)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request, the model must not be empty"})
 		return
 	}
 
 	if err := pkg.CheckValidEmails(request.Friends); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	response, err := ctl.service.CreateConnection(request)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -116,23 +116,23 @@ func (ctl *controller) CreateFriendConnection(c *gin.Context) {
 func (ctl *controller) GetFriendListByEmail(c *gin.Context) {
 	var request models.FriendListRequest
 	if err := c.BindJSON(&request); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if request == (models.FriendListRequest{}) {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request, the model must not be empty"})
 		return
 	}
 
 	if err := pkg.CheckValidEmail(request.Email); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	response, err := ctl.service.GetFriendConnection(request)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -153,23 +153,23 @@ func (ctl *controller) GetFriendListByEmail(c *gin.Context) {
 func (ctl *controller) ShowCommonFriendList(c *gin.Context) {
 	var request models.CommonFriendListRequest
 	if err := c.BindJSON(&request); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if request.Friends == nil || len(request.Friends) == 0 {
-		c.Status(http.StatusBadRequest)
+	if request.Friends == nil || len(request.Friends) < 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request, the friends list must have over 1 item"})
 		return
 	}
 
 	if err := pkg.CheckValidEmails(request.Friends); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	response, err := ctl.service.ShowCommonFriendList(request)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -190,23 +190,23 @@ func (ctl *controller) ShowCommonFriendList(c *gin.Context) {
 func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 	var request models.SubscribeRequest
 	if err := c.BindJSON(&request); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if request.Requestor == "" || request.Target == "" {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request, both requestor and target must not be null"})
 		return
 	}
 
 	if err := pkg.CheckValidEmails([]string{request.Requestor, request.Target}); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	response, err := ctl.service.SubscribeFromEmail(request)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -227,23 +227,23 @@ func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 	var request models.BlockSubscribeRequest
 	if err := c.BindJSON(&request); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if request.Requestor == "" || request.Target == "" {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request, both requestor and target must not be null"})
 		return
 	}
 
 	if err := pkg.CheckValidEmails([]string{request.Requestor, request.Target}); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	response, err := ctl.service.BlockSubscribeByEmail(request)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -264,23 +264,23 @@ func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 func (ctl *controller) GetSubscribingEmailListByEmail(c *gin.Context) {
 	var request models.GetSubscribingEmailListRequest
 	if err := c.BindJSON(&request); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	if request.Sender == "" || request.Text == "" {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request, both Sender and Text must not be null"})
 		return
 	}
 
 	if err := pkg.CheckValidEmail(request.Sender); err != nil {
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	response, err := ctl.service.GetSubscribingEmailListByEmail(request)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

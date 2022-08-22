@@ -74,7 +74,7 @@ func (repo *repository) CreateFriendConnection(friendConnectionRequest models.Fr
 	if err != nil {
 		return models.Relationship{}, err
 	}
-	_, err = tx.Exec("INSERT INTO public.relationship(requestor, target, IsFriend) VALUES($1,$2,true),($2,$1,true) ON CONFLICT (requestor,target) DO UPDATE SET IsFriend = EXCLUDED.IsFriend", friendConnectionRequest.Friends[0], friendConnectionRequest.Friends[1])
+	_, err = tx.Exec("INSERT INTO public.relationship(requestor, target, is_friend) VALUES($1,$2,true),($2,$1,true) ON CONFLICT (requestor,target) DO UPDATE SET is_friend = EXCLUDED.is_friend", friendConnectionRequest.Friends[0], friendConnectionRequest.Friends[1])
 
 	if err != nil {
 		tx.Rollback()
@@ -93,7 +93,7 @@ func (repo *repository) FindFriendsByEmail(request models.FriendListRequest) ([]
 		return []models.Relationship{}, err
 	}
 
-	rows, err := repo.db.Query("SELECT requestor FROM public.relationship WHERE target=$1 and IsFriend=true AND FriendBlocked=false UNION SELECT target FROM public.relationship WHERE requestor=$1 and IsFriend=true AND FriendBlocked=false", request.Email)
+	rows, err := repo.db.Query("SELECT requestor FROM public.relationship WHERE target=$1 and is_friend=true AND friend_blocked=false UNION SELECT target FROM public.relationship WHERE requestor=$1 and is_friend=true AND friend_blocked=false", request.Email)
 	if err != nil {
 		return []models.Relationship{}, err
 	}
@@ -180,7 +180,7 @@ func (repo *repository) BlockSubscribeByEmail(req models.BlockSubscribeRequest) 
 
 	//suppose A block B:
 	//if A and B are friend, A no longer receive notify from B
-	_, err = tx.Exec("INSERT INTO public.relationship(requestor,target,SubscribeBlocked) VALUES ($1,$2,true) ON CONFLICT (requestor,target) DO UPDATE SET SubscribeBlocked = EXCLUDED.SubscribeBlocked", req.Requestor, req.Target)
+	_, err = tx.Exec("INSERT INTO public.relationship(requestor,target,subscribe_blocked) VALUES ($1,$2,true) ON CONFLICT (requestor,target) DO UPDATE SET subscribe_blocked = EXCLUDED.subscribe_blocked", req.Requestor, req.Target)
 	if err != nil {
 		tx.Rollback()
 		return models.Relationship{}, err
@@ -202,7 +202,7 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 	var relationships []models.Relationship
 
 	//has a friend connection
-	rows, err := repo.db.Query("SELECT requestor, target, IsFriend, FriendBlocked, subscribed, SubscribeBlocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND IsFriend=true AND FriendBlocked=false", req.Sender)
+	rows, err := repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND is_friend=true AND friend_blocked=false", req.Sender)
 	if err != nil {
 		return []models.Relationship{}, err
 	}
@@ -218,7 +218,7 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 	}
 
 	//if has a friend connection, but blocked in subscribers tables
-	rows, err = repo.db.Query("SELECT requestor, target, IsFriend, FriendBlocked, subscribed, SubscribeBlocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND IsFriend=true AND subscribed=true AND FriendBlocked=false AND SubscribeBlocked=true", req.Sender)
+	rows, err = repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE rs.requestor=$1 OR rs.target=$1 AND is_friend=true AND subscribed=true AND friend_blocked=false AND subscribe_blocked=false", req.Sender)
 	if err != nil {
 		return []models.Relationship{}, err
 	}
@@ -233,7 +233,7 @@ func (repo *repository) GetSubscribingEmailListByEmail(req models.GetSubscribing
 	}
 
 	//if subscribed to updates
-	rows, err = repo.db.Query("SELECT requestor, target, IsFriend, FriendBlocked, subscribed, SubscribeBlocked FROM public.relationship rs WHERE rs.target=$1 AND subscribed=true AND SubscribeBlocked=false", req.Sender)
+	rows, err = repo.db.Query("SELECT requestor, target, is_friend, friend_blocked, subscribed, subscribe_blocked FROM public.relationship rs WHERE rs.target=$1 AND subscribed=true AND subscribe_blocked=false", req.Sender)
 	if err != nil {
 		return []models.Relationship{}, err
 	}
