@@ -239,7 +239,7 @@ func TestShowFriendsByEmailWrongBody(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "{\"error\":\"Invalid Request, the model must not be empty\"}", w.Body.String())
+	assert.Equal(t, "{\"error\":\"invalid Request, the model must not be empty\"}", w.Body.String())
 }
 
 func TestShowFriendsByEmailWithInvalidEmail(t *testing.T) {
@@ -256,7 +256,7 @@ func TestShowFriendsByEmailWithInvalidEmail(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "{\"error\":\"Invalid email address\"}", w.Body.String())
+	assert.Equal(t, "{\"error\":\"invalid email address\"}", w.Body.String())
 }
 
 func TestShowCommonFriendListSuccessfulCode(t *testing.T) {
@@ -322,7 +322,7 @@ func TestShowCommonFriendListWrongBody(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "{\"error\":\"Invalid Request, the friends list must have over 1 item\"}", w.Body.String())
+	assert.Equal(t, "{\"error\":\"invalid Request, the friends list must have over 1 item\"}", w.Body.String())
 }
 
 func TestShowCommonFriendListWithInvalid(t *testing.T) {
@@ -642,7 +642,7 @@ func TestShowSubscribingEmailListByEmailWrongBody(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "{\"error\":\"Invalid request, both Sender and Text must not be null\"}", w.Body.String())
+	assert.Equal(t, "{\"error\":\"invalid request, both Sender and Text must not be null\"}", w.Body.String())
 }
 
 func TestShowSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
@@ -659,7 +659,7 @@ func TestShowSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.Equal(t, "{\"error\":\"Invalid email address\"}", w.Body.String())
+	assert.Equal(t, "{\"error\":\"invalid email address\"}", w.Body.String())
 }
 
 type ServiceMock struct {
@@ -675,7 +675,7 @@ func (s *ServiceMock) CreateUser(req models.CreatingUserRequest) (models.Creatin
 
 func (s *ServiceMock) CreateConnection(request models.FriendConnectionRequest) (models.FriendConnectionResponse, error) {
 	if err := pkg.CheckValidEmails(request.Friends); err != nil {
-		return models.FriendConnectionResponse{Success: true}, errors.New("Invalid email address")
+		return models.FriendConnectionResponse{Success: true}, errors.New("invalid email address")
 	}
 	if len(request.Friends) > 0 {
 		return models.FriendConnectionResponse{Success: true}, nil

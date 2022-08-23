@@ -50,7 +50,7 @@ func TestFriendConnectionFailCase(t *testing.T) {
 	result, err := myService.CreateConnection(models.FriendConnectionRequest{Friends: []string{}})
 	expectedRs := models.FriendConnectionResponse{Success: false}
 	assert.Equal(t, expectedRs, result)
-	assert.Equal(t, errors.New("Email address is empty"), err)
+	assert.Equal(t, errors.New("email address is empty"), err)
 }
 
 func TestShowFriendsByEmailSuccessfulCase(t *testing.T) {
@@ -138,7 +138,7 @@ func TestShowCommonFriendListEmptyModel(t *testing.T) {
 
 	exp := models.CommonFriendListResponse{}
 	assert.Equal(t, exp, response)
-	assert.Equal(t, errors.New("Email address is empty"), err)
+	assert.Equal(t, errors.New("email address is empty"), err)
 }
 
 func TestSubscribeFromEmailSuccessfulCase(t *testing.T) {
@@ -259,7 +259,7 @@ func TestGetSubscribingEmailListWithEmailEmptyModel(t *testing.T) {
 
 	exp := models.GetSubscribingEmailListResponse{}
 	assert.Equal(t, exp, response)
-	assert.Equal(t, errors.New("Invalid Request"), err)
+	assert.Equal(t, errors.New("invalid request"), err)
 }
 
 func TestGetSubscribingEmailListWithInvalidEmail(t *testing.T) {

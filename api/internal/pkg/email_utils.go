@@ -11,13 +11,14 @@ import (
 // return an error type
 func CheckValidEmails(emails []string) error {
 	if emails == nil || len(emails) == 0 {
-		return errors.New("Email address is empty")
+		return errors.New("email address is empty")
 	}
 	for _, email := range emails {
 		if CheckValidEmail(email) != nil {
-			return errors.New("Invalid email address")
+			return errors.New("invalid email address")
 		}
 	}
+
 	return nil
 }
 
@@ -27,7 +28,8 @@ func CheckValidEmails(emails []string) error {
 func CheckValidEmail(email string) error {
 	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	if strings.TrimSpace(email) == "" || !emailRegex.MatchString(email) {
-		return errors.New("Invalid email address")
+		return errors.New("invalid email address")
 	}
+
 	return nil
 }

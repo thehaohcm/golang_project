@@ -9,14 +9,16 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var lock = &sync.Mutex{}
+var (
+	lock = &sync.Mutex{}
 
-var db *sql.DB
+	db *sql.DB
 
-var dbTest *sql.DB
+	dbTest *sql.DB
 
-var dbInfo = "host=" + os.Getenv("POSTGRES_HOST") + " port=" + os.Getenv("POSTGRES_PORT") + " user=" + os.Getenv("POSTGRES_USER") + " " +
-	"password=" + os.Getenv("POSTGRES_PASSWORD") + " dbname=" + os.Getenv("POSTGRES_DB_NAME") + " sslmode=disable"
+	dbInfo = "host=" + os.Getenv("POSTGRES_HOST") + " port=" + os.Getenv("POSTGRES_PORT") + " user=" + os.Getenv("POSTGRES_USER") + " " +
+		"password=" + os.Getenv("POSTGRES_PASSWORD") + " dbname=" + os.Getenv("POSTGRES_DB_NAME") + " sslmode=disable"
+)
 
 // GetDBInstance function used to get or initialize a database connection
 // no parameter
@@ -54,6 +56,6 @@ func connectDatabase() *sql.DB {
 	if err != nil {
 		panic(err)
 	}
-	log.Print("connected to db")
+	log.Println("Connected to db")
 	return db
 }

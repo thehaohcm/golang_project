@@ -42,6 +42,7 @@ func (svc *service) CreateUser(request models.CreatingUserRequest) (models.Creat
 	if err != nil {
 		return models.CreatingUserResponse{}, err
 	}
+
 	return models.CreatingUserResponse{Success: true}, nil
 }
 
@@ -53,6 +54,7 @@ func (svc *service) CreateConnection(request models.FriendConnectionRequest) (mo
 	if err != nil {
 		return models.FriendConnectionResponse{}, err
 	}
+
 	return models.FriendConnectionResponse{Success: true}, nil
 }
 
@@ -71,6 +73,7 @@ func (svc *service) GetFriendConnection(request models.FriendListRequest) (model
 		}
 		return models.FriendListResponse{Success: true, Friends: friends, Count: len(friends)}, nil
 	}
+
 	return models.FriendListResponse{Success: false}, nil
 }
 
@@ -89,8 +92,8 @@ func (svc *service) ShowCommonFriendList(request models.CommonFriendListRequest)
 	for _, relationship := range relationships {
 		friends = append(friends, relationship.Target)
 	}
-	return models.CommonFriendListResponse{Success: true, Friends: friends, Count: len(friends)}, nil
 
+	return models.CommonFriendListResponse{Success: true, Friends: friends, Count: len(friends)}, nil
 }
 
 // SubscribeFromEmail function works as a service function for creating a subscribe from an email address to another one
@@ -101,6 +104,7 @@ func (svc *service) SubscribeFromEmail(request models.SubscribeRequest) (models.
 	if err != nil {
 		return models.SubscribeResponse{}, err
 	}
+
 	return models.SubscribeResponse{Success: relationships != models.Relationship{}}, nil
 }
 
@@ -112,6 +116,7 @@ func (svc *service) BlockSubscribeByEmail(request models.BlockSubscribeRequest) 
 	if err != nil {
 		return models.BlockSubscribeResponse{}, err
 	}
+
 	return models.BlockSubscribeResponse{Success: true}, nil
 }
 
@@ -121,7 +126,7 @@ func (svc *service) BlockSubscribeByEmail(request models.BlockSubscribeRequest) 
 func (svc *service) GetSubscribingEmailListByEmail(request models.GetSubscribingEmailListRequest) (models.GetSubscribingEmailListResponse, error) {
 	response := models.GetSubscribingEmailListResponse{Success: false}
 	if request == (models.GetSubscribingEmailListRequest{}) {
-		return models.GetSubscribingEmailListResponse{}, errors.New("Invalid Request")
+		return models.GetSubscribingEmailListResponse{}, errors.New("invalid request")
 	}
 	relationship, err := svc.repository.GetSubscribingEmailListByEmail(request)
 	if err != nil {
@@ -134,5 +139,6 @@ func (svc *service) GetSubscribingEmailListByEmail(request models.GetSubscribing
 		}
 		response.Recipients = recipients
 	}
+
 	return response, nil
 }

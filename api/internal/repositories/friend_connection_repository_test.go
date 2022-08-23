@@ -44,7 +44,7 @@ func TestCreateUserWithInvalidEmail(t *testing.T) {
 
 	result, err := mockRepo.CreateUser(models.CreatingUserRequest{Email: "abc"})
 	expectedResult := models.User{}
-	errExpected := errors.New("Invalid email address")
+	errExpected := errors.New("invalid email address")
 	assert.Equal(t, expectedResult, result)
 	assert.Equal(t, errExpected, err)
 }
@@ -64,7 +64,7 @@ func TestCreateUserWithEmptyBody(t *testing.T) {
 
 	result, err := mockRepo.CreateUser(models.CreatingUserRequest{Email: ""})
 	expectedResult := models.User{}
-	errExpected := errors.New("Invalid email address")
+	errExpected := errors.New("invalid email address")
 	assert.Equal(t, expectedResult, result)
 	assert.Equal(t, errExpected, err)
 }
@@ -79,12 +79,12 @@ func TestCreateUserWithErrorAndRollback(t *testing.T) {
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
 	sqlMock.ExpectBegin()
-	sqlMock.ExpectExec("INSERT INTO public.user_account").WillReturnError(fmt.Errorf("Error"))
+	sqlMock.ExpectExec("INSERT INTO public.user_account").WillReturnError(fmt.Errorf("error"))
 	sqlMock.ExpectRollback()
 
 	result, err := mockRepo.CreateUser(models.CreatingUserRequest{Email: "thehaohcm@yahoo.com.vn"})
 	assert.Equal(t, models.User{}, result)
-	assert.Equal(t, errors.New("Error"), err)
+	assert.Equal(t, errors.New("error"), err)
 }
 
 func TestCreateFriendConnectionWithSuccessfulCase(t *testing.T) {
@@ -121,7 +121,7 @@ func TestCreateFriendConnectionWithNilRequest(t *testing.T) {
 
 	result, err := mockRepo.CreateFriendConnection(models.FriendConnectionRequest{})
 	assert.Equal(t, models.Relationship{}, result)
-	assert.Error(t, err, errors.New("Invalid Request"))
+	assert.Error(t, err, errors.New("invalid request"))
 }
 
 func TestCreateFriendConnectionWithEmptyRequest(t *testing.T) {
@@ -158,7 +158,7 @@ func TestCreateFriendConnectionWithInvalidEmail(t *testing.T) {
 
 	result, err := mockRepo.CreateFriendConnection(models.FriendConnectionRequest{Friends: []string{"test"}})
 	assert.Equal(t, models.Relationship{}, result)
-	assert.Error(t, errors.New("Invalid email address"), err)
+	assert.Error(t, errors.New("invalid email address"), err)
 }
 
 func TestCreateFriendConnectionWithExceesEmails(t *testing.T) {
@@ -176,7 +176,7 @@ func TestCreateFriendConnectionWithExceesEmails(t *testing.T) {
 
 	result, err := mockRepo.CreateFriendConnection(models.FriendConnectionRequest{Friends: []string{"hao.nguyen@s3corp.com.vn", "thehaohcm@yahoo.com.vn", "thehaohcm@gmail.com"}})
 	assert.Equal(t, models.Relationship{}, result)
-	assert.Error(t, err, errors.New("Invalid Request"))
+	assert.Error(t, err, errors.New("invalid request"))
 }
 
 func TestCreateFriendConnectionWithErrorAndRollback(t *testing.T) {
@@ -189,12 +189,12 @@ func TestCreateFriendConnectionWithErrorAndRollback(t *testing.T) {
 	var mockRepo FriendConnectionRepository = New(mockDB)
 
 	sqlMock.ExpectBegin()
-	sqlMock.ExpectExec("INSERT INTO public.relationship").WillReturnError(fmt.Errorf("Error"))
+	sqlMock.ExpectExec("INSERT INTO public.relationship").WillReturnError(fmt.Errorf("error"))
 	sqlMock.ExpectRollback()
 
 	result, err := mockRepo.CreateFriendConnection(models.FriendConnectionRequest{Friends: []string{"hao.nguyen@s3corp.com.vn", "thehaohcm@yahoo.com.vn"}})
 	assert.Equal(t, models.Relationship{}, result)
-	assert.Equal(t, errors.New("Error"), err)
+	assert.Equal(t, errors.New("error"), err)
 }
 
 func TestFindFriendsByEmailWithSuccessfulCase(t *testing.T) {
@@ -349,7 +349,7 @@ func TestFindCommonFriendsByEmailsWithInvalidEmailRequest(t *testing.T) {
 
 	result, err := mockRepo.FindCommonFriendsByEmails(models.CommonFriendListRequest{Friends: []string{"test"}})
 	assert.Equal(t, []models.Relationship{}, result)
-	assert.Error(t, errors.New("Invalid email address"), err)
+	assert.Error(t, errors.New("invalid email address"), err)
 }
 
 func TestSubscribeFromEmailWithSuccessfulCase(t *testing.T) {
@@ -383,7 +383,7 @@ func TestSubscribeFromEmailWithInvalidEmail(t *testing.T) {
 	result, err := mockRepo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen@s3corp.com.vn"})
 	expectedResult := models.Relationship{}
 	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, errors.New("Invalid email address"), err)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestSubscribeFromEmailWithInvalidEmails(t *testing.T) {
@@ -402,7 +402,7 @@ func TestSubscribeFromEmailWithInvalidEmails(t *testing.T) {
 	result, err := mockRepo.SubscribeFromEmail(models.SubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen"})
 	expectedResult := models.Relationship{}
 	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, errors.New("Invalid email address"), err)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestSubscribeFromEmailWithNilReq(t *testing.T) {
@@ -421,7 +421,7 @@ func TestSubscribeFromEmailWithNilReq(t *testing.T) {
 	result, err := mockRepo.SubscribeFromEmail(models.SubscribeRequest{})
 	expectedResult := models.Relationship{}
 	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, errors.New("Invalid email address"), err)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestSubscribeFromEmailWithFailureAndRollback(t *testing.T) {
@@ -494,7 +494,7 @@ func TestBlockSubscribeByEmailInvalidEmails(t *testing.T) {
 	result, err := mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm", Target: "chinh.nguyen"})
 	expectedResult := models.Relationship{}
 	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, errors.New("Invalid email address"), err)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestBlockSubscribeByEmailWithNilRequest(t *testing.T) {
@@ -509,7 +509,7 @@ func TestBlockSubscribeByEmailWithNilRequest(t *testing.T) {
 	result, err := mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{})
 	expectedResult := models.Relationship{}
 	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, errors.New("Invalid email address"), err)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestBlockSubscribeByEmailWithNilRequestor(t *testing.T) {
@@ -528,7 +528,7 @@ func TestBlockSubscribeByEmailWithNilRequestor(t *testing.T) {
 	result, err := mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Target: "chinh.nguyen"})
 	expectedResult := models.Relationship{}
 	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, errors.New("Invalid email address"), err)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestBlockSubscribeByEmailWithNilTarget(t *testing.T) {
@@ -547,7 +547,7 @@ func TestBlockSubscribeByEmailWithNilTarget(t *testing.T) {
 	result, err := mockRepo.BlockSubscribeByEmail(models.BlockSubscribeRequest{Requestor: "thehaohcm"})
 	expectedResult := models.Relationship{}
 	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, errors.New("Invalid email address"), err)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestBlockSubscribeByEmailWithErrorAndRollback(t *testing.T) {
@@ -668,7 +668,7 @@ func TestGetSubscribingEmailListByEmailWithNilSender(t *testing.T) {
 	result, err := mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Text: "hello world"})
 	expectedResult := []models.Relationship{}
 	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, errors.New("Invalid email address"), err)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }
 
 func TestGetSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
@@ -683,5 +683,5 @@ func TestGetSubscribingEmailListByEmailWithInvalidEmail(t *testing.T) {
 	result, err := mockRepo.GetSubscribingEmailListByEmail(models.GetSubscribingEmailListRequest{Sender: "thehaohcm", Text: "hello world"})
 	expectedResult := []models.Relationship{}
 	assert.Equal(t, expectedResult, result)
-	assert.Equal(t, errors.New("Invalid email address"), err)
+	assert.Equal(t, errors.New("invalid email address"), err)
 }

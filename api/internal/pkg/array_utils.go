@@ -12,17 +12,19 @@ func RemoveDuplicatedItems(items []string) []string {
 			list = append(list, entry)
 		}
 	}
+
 	return list
 }
 
 // RemoveItemInArray function used for remove a specific string item in a string array
 // pass a string array and a string item as parameter
 // return a string array
-func RemoveItemInArray(l []string, item string) []string {
-	for i, other := range l {
+func RemoveItemInArray(list []string, item string) []string {
+	for i, other := range list {
 		if other == item {
-			return append(l[:i], l[i+1:]...)
+			return append(list[:i], list[i+1:]...)
 		}
 	}
-	return l
+
+	return list
 }

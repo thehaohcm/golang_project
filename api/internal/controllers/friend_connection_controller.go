@@ -62,7 +62,8 @@ func (ctl *controller) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, response)
+
+	c.JSON(http.StatusOK, response)
 }
 
 // PingExample godoc
@@ -84,7 +85,7 @@ func (ctl *controller) CreateFriendConnection(c *gin.Context) {
 	}
 
 	if len(request.Friends) != 2 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request, the model must not be empty"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid Request, the model must not be empty"})
 		return
 	}
 
@@ -99,7 +100,7 @@ func (ctl *controller) CreateFriendConnection(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, response)
 }
 
 // PingExample godoc
@@ -121,7 +122,7 @@ func (ctl *controller) GetFriendListByEmail(c *gin.Context) {
 	}
 
 	if request == (models.FriendListRequest{}) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request, the model must not be empty"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid Request, the model must not be empty"})
 		return
 	}
 
@@ -136,7 +137,7 @@ func (ctl *controller) GetFriendListByEmail(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, response)
 }
 
 // PingExample godoc
@@ -158,7 +159,7 @@ func (ctl *controller) ShowCommonFriendList(c *gin.Context) {
 	}
 
 	if request.Friends == nil || len(request.Friends) < 2 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Request, the friends list must have over 1 item"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid Request, the friends list must have over 1 item"})
 		return
 	}
 
@@ -173,7 +174,7 @@ func (ctl *controller) ShowCommonFriendList(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, response)
 }
 
 // PingExample godoc
@@ -195,7 +196,7 @@ func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 	}
 
 	if request.Requestor == "" || request.Target == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request, both requestor and target must not be null"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request, both requestor and target must not be null"})
 		return
 	}
 
@@ -210,7 +211,7 @@ func (ctl *controller) SubscribeFromEmail(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, response)
 }
 
 // PingExample godoc
@@ -232,7 +233,7 @@ func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 	}
 
 	if request.Requestor == "" || request.Target == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request, both requestor and target must not be null"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request, both requestor and target must not be null"})
 		return
 	}
 
@@ -247,7 +248,7 @@ func (ctl *controller) BlockSubscribeByEmail(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, response)
 }
 
 // PingExample godoc
@@ -269,7 +270,7 @@ func (ctl *controller) GetSubscribingEmailListByEmail(c *gin.Context) {
 	}
 
 	if request.Sender == "" || request.Text == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request, both Sender and Text must not be null"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request, both Sender and Text must not be null"})
 		return
 	}
 
@@ -284,5 +285,5 @@ func (ctl *controller) GetSubscribingEmailListByEmail(c *gin.Context) {
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, response)
 }
