@@ -26,7 +26,7 @@ WORKDIR /app/api/cmd/golang_project/
 RUN go build -o /app/api/cmd/golang_project/main
 
 # Expose port 8080 to the outside world
-EXPOSE 80
+EXPOSE 443
 
 # Run the executable
 CMD ["./main"]
