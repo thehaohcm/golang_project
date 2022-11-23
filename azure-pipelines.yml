@@ -27,5 +27,4 @@ stages:
         repository: 'golang-repo'
         command: 'buildAndPush'
         dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        tags: |
-          $(tag)
+        tags: 'latest'
