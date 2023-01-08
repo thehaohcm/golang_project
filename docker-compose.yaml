@@ -18,22 +18,6 @@ services:
         aliases:
           - database
 
-  #migrate service
-  migrate:
-    image: migrate/migrate
-    networks:
-      - backend
-    links:
-      - db
-    volumes:
-      - ./data/migrations/:/migrations
-    # working_dir: /migrations
-    command: -source file:/migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB_NAME}?sslmode=disable up 3
-    depends_on:
-      - db
-      - app
-    # restart: on-failure
-
   # App Service
   app:
     container_name: main
@@ -49,6 +33,23 @@ services:
     restart: unless-stopped
     networks:
       - backend
+      
+  #migrate service
+  migrate:
+    image: migrate/migrate
+    networks:
+      - backend
+    links:
+      - db
+    volumes:
+      - ./data/migrations/:/migrations
+    # working_dir: /migrations
+    command: -source file:/migrations -database postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT}/${POSTGRES_DB_NAME}?sslmode=disable up 3
+    depends_on:
+      - db
+      - app
+    # restart: on-failure
+    
 volumes:
   db:
     driver: local
