@@ -8,6 +8,7 @@ services:
     container_name: db
     image: postgres:14.1-alpine
     restart: always
+    env_file: .env
     ports:
       - "${DB_PORT}:${POSTGRES_PORT}"
     volumes: 
